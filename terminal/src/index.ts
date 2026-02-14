@@ -6,13 +6,18 @@ process.on("exit", cleanup); // Regular exit
 process.on("SIGINT", cleanupAndExit); // Ctrl-C, does not exit by default, need to manually exit
 process.on("SIGTERM", cleanupAndExit); // Terminated by terminal
 
+// environment config
+const MAX_WIDTH = process.stdout.columns;
+const MAX_HEIGHT = process.stdout.rows;
+
+// game config
 const FPS = 10;
 const DELTA_TIME_MS = 1000 / FPS
 
 const WIDTH = 40;
 const HEIGHT = 10;
 
-const BG_CHAR = " ";
+const BG_CHAR = "0";
 const SNAKE_CHAR = "x";
 
 // init game logic
@@ -66,8 +71,42 @@ function drawChar(canvas: string[][], x: number, y: number, char: string) {
 
 function canvasToStringBuffer(canvas: string[][]) {
     let buffer = "";
-    for (let row of canvas)
-        buffer += row.join("") + "\n";
+
+    const yPadding = Math.floor((MAX_HEIGHT - canvas.length) / 2);
+    const xPadding = Math.floor((MAX_WIDTH - canvas[0]!.length) / 2);
+
+    // upper buffer
+    for (let y = 0; y < yPadding; y++) {
+        for (let x = 0; x < MAX_WIDTH; x++) {
+            buffer += " ";
+        }
+        buffer += "\n"
+    }
+
+    for (let row of canvas) {
+
+        // left buffer
+        for (let x = 0; x < xPadding; x++)
+            buffer += " "
+
+        // render
+        buffer += row.join("");
+
+        // right buffer
+        for (let x = 0; x < xPadding; x++)
+            buffer += " "
+
+        buffer += "\n"
+    }
+
+    // lower buffer
+    for (let y = 0; y < yPadding; y++) {
+        for (let x = 0; x < MAX_WIDTH; x++) {
+            buffer += " ";
+        }
+        buffer += "\n"
+    }
+
     return buffer
 }
 

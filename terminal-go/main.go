@@ -27,7 +27,7 @@ func main() {
 	GAME_CONFIG := createGameConfig()
 	canvas := createCanvas(GAME_CONFIG)
 	snakeHeadPos := Vector2{0, 0}
-	snakeDirection := Vector2{0, 0}
+	snakeDirection := Vector2{1, 0}
 
 	// game loop
 	for { // "'while' is spelled 'for' in Go"
@@ -53,8 +53,8 @@ func main() {
 		// TODO : reset input buffer
 
 		// draw
-		// TODO : reset canvas
-		// TODO : draw snake
+		resetCanvas(canvas, GAME_CONFIG)
+		drawChar(canvas, snakeHeadPos, GAME_CONFIG.SNAKE_CHAR, GAME_CONFIG)
 
 		// render
 		buffer := canvasToStringBuffer(canvas)
@@ -221,6 +221,20 @@ func createCanvas(config GameConfig) [][]string {
 	}
 
 	return canvas
+}
+
+func resetCanvas(canvas [][]string, config GameConfig) [][]string {
+	for y := 0; y < config.CANVAS_SIZE.y; y++ {
+		for x := 0; x < config.CANVAS_SIZE.x; x++ {
+			drawChar(canvas, Vector2{x, y}, config.BG_CHAR, config)
+		}
+	}
+	return canvas
+}
+
+func drawChar(canvas [][]string, position Vector2, char string, config GameConfig) {
+	// canvas is drawn from top to bottom but game coordinates is from bottom to top
+	canvas[config.TERM_SIZE.y-(config.PADDING.y+position.y)-2][config.PADDING.x+position.x] = char
 }
 
 func canvasToStringBuffer(canvas [][]string) string {

@@ -17,7 +17,8 @@ const DELTA_TIME_MS = 1000 / FPS
 const WIDTH = 40;
 const HEIGHT = 10;
 
-const BG_CHAR = "0";
+const PADDING_CHAR = " ";
+const BG_CHAR = " ";
 const SNAKE_CHAR = "x";
 
 // init game logic
@@ -75,34 +76,34 @@ function canvasToStringBuffer(canvas: string[][]) {
     const yPadding = Math.floor((MAX_HEIGHT - canvas.length) / 2);
     const xPadding = Math.floor((MAX_WIDTH - canvas[0]!.length) / 2);
 
-    // upper buffer
+    // upper padding
     for (let y = 0; y < yPadding; y++) {
         for (let x = 0; x < MAX_WIDTH; x++) {
-            buffer += " ";
+            buffer += PADDING_CHAR;
         }
         buffer += "\n"
     }
 
     for (let row of canvas) {
 
-        // left buffer
+        // left padding
         for (let x = 0; x < xPadding; x++)
-            buffer += " "
+            buffer += PADDING_CHAR
 
         // render
         buffer += row.join("");
 
-        // right buffer
+        // right padding
         for (let x = 0; x < xPadding; x++)
-            buffer += " "
+            buffer += PADDING_CHAR
 
         buffer += "\n"
     }
 
-    // lower buffer
+    // lower padding
     for (let y = 0; y < yPadding; y++) {
         for (let x = 0; x < MAX_WIDTH; x++) {
-            buffer += " ";
+            buffer += PADDING_CHAR;
         }
         buffer += "\n"
     }

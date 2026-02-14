@@ -35,12 +35,14 @@ const DOWN_KEY_VAR_2 = "\u001b[B" // arrow down
 const LEFT_KEY_VAR_2 = "\u001b[D" // arrow left
 const RIGHT_KEY_VAR_2 = "\u001b[C" // arrow right
 
-const UP_ACTION = "up"
-const DOWN_ACTION = "down"
-const LEFT_ACTION = "left"
-const RIGHT_ACTION = "right"
+type InputAction = "up" | "down" | "left" | "right"
 
-const INPUT_MAP = new Map<string, string>([
+const UP_ACTION: InputAction = "up"
+const DOWN_ACTION: InputAction = "down"
+const LEFT_ACTION: InputAction = "left"
+const RIGHT_ACTION: InputAction = "right"
+
+const INPUT_MAP = new Map<string, InputAction>([
     [UP_KEY_VAR_1, UP_ACTION],
     [DOWN_KEY_VAR_1, DOWN_ACTION],
     [LEFT_KEY_VAR_1, LEFT_ACTION],
@@ -59,7 +61,7 @@ const BG_CHAR = " ";
 const SNAKE_CHAR = "x";
 
 // init game logic
-const inputActionBuffer: string[] = [];
+const inputActionBuffer: InputAction[] = [];
 const snakeHeadPos = [0, CANVAS_HEIGHT / 2]; // x,y
 const snakeDirection = [1, 0]
 
@@ -82,14 +84,33 @@ debug("canvas height:" + canvas.length.toString())
 
 while (true) {
 
-    // poll input
     // TODO : improve with input buffer logic (eg. quick up/left succession)
-
-
+    // poll input
+    const lastAction = inputActionBuffer.pop()
 
     // game logic - OnUpdate
+    if (lastAction === "up") {
+        snakeDirection[0] = 0;
+        snakeDirection[1] = 1;
+    }
+    else if (lastAction === "down") {
+        snakeDirection[0] = 0;
+        snakeDirection[1] = -1;
+    }
+    else if (lastAction === "left") {
+        snakeDirection[0] = -1;
+        snakeDirection[1] = 0;
+    }
+    else if (lastAction === "right") {
+        snakeDirection[0] = 1;
+        snakeDirection[1] = 0;
+    }
+
     snakeHeadPos[0] = (snakeHeadPos[0]! + snakeDirection[0]!) % CANVAS_WIDTH
     snakeHeadPos[1] = (snakeHeadPos[1]! + snakeDirection[1]!) % CANVAS_HEIGHT
+
+    if (snakeHeadPos[0] < 0) snakeHeadPos[0] += CANVAS_WIDTH
+    if (snakeHeadPos[1] < 0) snakeHeadPos[1] += CANVAS_HEIGHT
 
     // game logic - OnAfterUpdate
     inputActionBuffer.length = 0
@@ -207,6 +228,7 @@ function resetCanvas(canvas: string[][]) {
 }
 
 function drawChar(canvas: string[][], x: number, y: number, char: string) {
+    // canvas is drawn from top to bottom but game coordinates is from bottom to top
     canvas[PADDING_Y + y]![PADDING_X + x] = char;
 }
 

@@ -14,15 +14,20 @@ const MAX_HEIGHT = process.stdout.rows;
 const FPS = 10;
 const DELTA_TIME_MS = 1000 / FPS
 
-const WIDTH = 40;
-const HEIGHT = 10;
+const BORDER_X_THICKNESS = 2;
+const BORDER_Y_THICKNESS = 2;
+
+const CANVAS_WIDTH = 40;
+const CANVAS_HEIGHT = 10;
 
 const PADDING_CHAR = " ";
+const BORDER_X_CHAR = "-";
+const BORDER_Y_CHAR = "|";
 const BG_CHAR = " ";
 const SNAKE_CHAR = "x";
 
 // init game logic
-const snakeHeadPos = [0, HEIGHT / 2]; // x,y
+const snakeHeadPos = [0, CANVAS_HEIGHT / 2]; // x,y
 
 // init draw
 const canvas = createCanvas();
@@ -30,7 +35,7 @@ const canvas = createCanvas();
 while (true) {
 
     // game logic
-    snakeHeadPos[0] = (snakeHeadPos[0]! + 1) % WIDTH
+    snakeHeadPos[0] = (snakeHeadPos[0]! + 1) % CANVAS_WIDTH
 
     // draw
     resetCanvas(canvas);
@@ -47,9 +52,9 @@ while (true) {
 
 function createCanvas() {
     const canvas: string[][] = [];
-    for (let y = 0; y < HEIGHT; y++) {
+    for (let y = 0; y < CANVAS_HEIGHT; y++) {
         const row: string[] = [];
-        for (let x = 0; x < WIDTH; x++) {
+        for (let x = 0; x < CANVAS_WIDTH; x++) {
             row.push(BG_CHAR)
         }
         canvas.push(row);
@@ -73,28 +78,74 @@ function drawChar(canvas: string[][], x: number, y: number, char: string) {
 function canvasToStringBuffer(canvas: string[][]) {
     let buffer = "";
 
-    const yPadding = Math.floor((MAX_HEIGHT - canvas.length) / 2);
-    const xPadding = Math.floor((MAX_WIDTH - canvas[0]!.length) / 2);
+    const canvasHeight = canvas.length;
+    const canvasWidth = canvas[0]!.length
+
+    const yPadding = Math.floor((MAX_HEIGHT - canvasHeight) / 2);
+    const xPadding = Math.floor((MAX_WIDTH - canvasWidth) / 2);
 
     // upper padding
-    for (let y = 0; y < yPadding; y++) {
+    for (let y = 0; y < yPadding - BORDER_Y_THICKNESS; y++) {
         for (let x = 0; x < MAX_WIDTH; x++) {
             buffer += PADDING_CHAR;
         }
         buffer += "\n"
     }
 
+    // upper border
+    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
+        // left padding
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
+            buffer += PADDING_CHAR
+
+        // render border
+        for (let x = 0; x < BORDER_X_THICKNESS + canvasWidth + BORDER_X_THICKNESS; x++)
+            buffer += BORDER_X_CHAR
+
+        // right padding
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
+            buffer += PADDING_CHAR
+
+        buffer += "\n"
+    }
+
+    // render canvas
     for (let row of canvas) {
 
         // left padding
-        for (let x = 0; x < xPadding; x++)
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
             buffer += PADDING_CHAR
+
+        // left border
+        for (let x = 0; x < BORDER_X_THICKNESS; x++)
+            buffer += BORDER_Y_CHAR
 
         // render
         buffer += row.join("");
 
+        // right border
+        for (let x = 0; x < BORDER_X_THICKNESS; x++)
+            buffer += BORDER_Y_CHAR
+
         // right padding
-        for (let x = 0; x < xPadding; x++)
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
+            buffer += PADDING_CHAR
+
+        buffer += "\n"
+    }
+
+    // lower border
+    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
+        // left padding
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
+            buffer += PADDING_CHAR
+
+        // render border
+        for (let x = 0; x < BORDER_X_THICKNESS + canvasWidth + BORDER_X_THICKNESS; x++)
+            buffer += BORDER_X_CHAR
+
+        // right padding
+        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
             buffer += PADDING_CHAR
 
         buffer += "\n"

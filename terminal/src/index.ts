@@ -1,11 +1,4 @@
-const isANSISupported = true;
-// const isANSISupported = false; // ANSI support is not guaranteed in Windows
-
-const RESET = "\x1b[0m";
-const HIDE_CURSOR = "\x1b[?25l";
-const SHOW_CURSOR = "\x1b[?25h";
-const CURSOR_HOME = "\x1b[H";
-const CLEAR = "\x1b[2J";
+import * as ANSI from "./ANSI";
 
 process.on("exit", cleanup); // Regular exit
 process.on("SIGINT", cleanupAndExit); // Ctrl-C, does not exit by default, need to manually exit
@@ -22,9 +15,8 @@ for (let i = 0; i < 5; i++) {
 }
 
 function clearAndDrawBuffer(buffer: string) {
-    if (isANSISupported) {
-        // hides the cursor and does a single write, preventing flicker
-        process.stdout.write(CLEAR + HIDE_CURSOR + CURSOR_HOME + buffer + RESET);
+    if (ANSI.isANSISupported) {
+        ANSI.clearAndDrawBuffer(buffer)
     }
     else {
         console.clear();
@@ -38,8 +30,8 @@ function cleanupAndExit() {
 }
 
 function cleanup() {
-    if (isANSISupported) {
-        process.stdout.write(CLEAR + CURSOR_HOME + SHOW_CURSOR);
+    if (ANSI.isANSISupported) {
+        ANSI.cleanup();
     }
     else {
         console.clear();

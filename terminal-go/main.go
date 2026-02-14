@@ -1,11 +1,14 @@
 package main
 
 import (
-	"github.com/gjtiquia/cURLy/terminal-go/ansi"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gjtiquia/cURLy/terminal-go/ansi"
+	"golang.org/x/term"
 )
 
 // game config
@@ -15,6 +18,20 @@ const DELTA_TIME_MS = 1000 / FPS
 func main() {
 	defer cleanup() // called at the end if no SIGINT or SIGTERM is received
 	go listenToSIGINTAndSIGTERM(cleanup)
+
+	// set up log file
+	const fileFlags = os.O_APPEND | os.O_CREATE | os.O_WRONLY // append to end, create if doesnt exist, write-only
+	const filePerm = 0666                                     // read = 4, write = 2, execute = 1; 6 = 4 + 2 (read write); 0 = octal; 666 = owner/group/others
+	file, err := os.OpenFile("log.txt", fileFlags, filePerm)
+	log.SetOutput(file)
+
+	currentTermFd := int(os.Stdout.Fd())
+	width, height, err := term.GetSize(currentTermFd)
+	if err != nil {
+		return
+	}
+
+	log.Printf("size: %vx%v", width, height)
 
 	// game loop
 	for { // "'while' is spelled 'for' in Go"

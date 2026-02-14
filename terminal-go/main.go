@@ -14,28 +14,59 @@ import (
 )
 
 func main() {
-	defer cleanup() // called at the end if no SIGINT or SIGTERM is received
-	go listenToSIGINTAndSIGTERM(cleanup)
-
 	file, err := initLogTxt()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	defer file.Close()
 
+	defer onBeforeExit(file) // called at the end if no SIGINT or SIGTERM is received
+	go listenToSIGINTAndSIGTERM(func() { onBeforeExit(file) })
+
+	// init game state
 	GAME_CONFIG := createGameConfig()
 	canvas := createCanvas(GAME_CONFIG)
+	snakeHeadPos := Vector2{0, 0}
+	snakeDirection := Vector2{0, 0}
 
 	// game loop
 	for { // "'while' is spelled 'for' in Go"
+
+		// TODO : poll input
+
+		// game logic - OnUpdate
+
+		// update snake head pos
+		snakeHeadPos = snakeHeadPos.Add(snakeDirection)
+
+		// wrap around canvas edge
+		snakeHeadPos.x = snakeHeadPos.x % GAME_CONFIG.CANVAS_SIZE.x
+		snakeHeadPos.y = snakeHeadPos.y % GAME_CONFIG.CANVAS_SIZE.y
+		if snakeHeadPos.x < 0 {
+			snakeHeadPos.x += GAME_CONFIG.CANVAS_SIZE.x
+		}
+		if snakeHeadPos.y < 0 {
+			snakeHeadPos.y += GAME_CONFIG.CANVAS_SIZE.y
+		}
+
+		// game logic - OnAfterUpdate
+		// TODO : reset input buffer
+
+		// draw
+		// TODO : reset canvas
+		// TODO : draw snake
+
+		// render
 		buffer := canvasToStringBuffer(canvas)
 		clearAndDrawBuffer(buffer)
+
+		// frame
+		// TODO : see multiplayer book suggested architecture
 		time.Sleep(time.Duration(GAME_CONFIG.DELTA_TIME_MS) * time.Millisecond)
 	}
 }
 
-func listenToSIGINTAndSIGTERM(cleanupFunc func()) {
+func listenToSIGINTAndSIGTERM(onBeforeExit func()) {
 	// create a channel, type os.Signal, buffer 1 (required by signal.Notify)
 	channel := make(chan os.Signal, 1)
 
@@ -43,12 +74,11 @@ func listenToSIGINTAndSIGTERM(cleanupFunc func()) {
 	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
 
 	// blocked until receives a notification from channel
-	<-channel
-	// receivedSignal := <-channel // go does not allow unused variables
-	// fmt.Println("receivedSignal", receivedSignal)
+	receivedSignal := <-channel // go does not allow unused variables
+	log.Println("receivedSignal:", receivedSignal)
 
-	// need to manually cleanup cuz deferred calls will not be called after exit
-	cleanupFunc()
+	// need to manually call cuz deferred calls will not be called after exit
+	onBeforeExit()
 
 	// caught the signal myself, so also need to exit myself, as it overrides the default behavior
 	os.Exit(0)
@@ -73,6 +103,10 @@ func initLogTxt() (*os.File, error) {
 type Vector2 struct {
 	x int
 	y int
+}
+
+func (this Vector2) Add(other Vector2) Vector2 {
+	return Vector2{x: this.x + other.x, y: this.y + other.y}
 }
 
 type GameConfig struct {
@@ -205,6 +239,10 @@ func clearAndDrawBuffer(buffer string) {
 	ansi.ClearAndDrawBuffer(buffer)
 }
 
-func cleanup() {
+func onBeforeExit(logFile *os.File) {
+	log.Println("onBeforeExit: cleanup")
 	ansi.Cleanup()
+
+	log.Println("onBeforeExit: close log.txt")
+	logFile.Close()
 }

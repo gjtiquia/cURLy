@@ -19,19 +19,20 @@ func main() {
 	defer cleanup() // called at the end if no SIGINT or SIGTERM is received
 	go listenToSIGINTAndSIGTERM(cleanup)
 
-	// set up log file
-	const fileFlags = os.O_APPEND | os.O_CREATE | os.O_WRONLY // append to end, create if doesnt exist, write-only
-	const filePerm = 0666                                     // read = 4, write = 2, execute = 1; 6 = 4 + 2 (read write); 0 = octal; 666 = owner/group/others
-	file, err := os.OpenFile("log.txt", fileFlags, filePerm)
-	log.SetOutput(file)
+	file, err := initLogTxt()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer file.Close()
 
 	currentTermFd := int(os.Stdout.Fd())
-	width, height, err := term.GetSize(currentTermFd)
+	termWidth, termHeight, err := term.GetSize(currentTermFd)
 	if err != nil {
 		return
 	}
 
-	log.Printf("size: %vx%v", width, height)
+	log.Printf("size: %vx%v", termWidth, termHeight)
 
 	// game loop
 	for { // "'while' is spelled 'for' in Go"
@@ -57,6 +58,22 @@ func listenToSIGINTAndSIGTERM(cleanupFunc func()) {
 
 	// caught the signal myself, so also need to exit myself, as it overrides the default behavior
 	os.Exit(0)
+}
+
+func initLogTxt() (*os.File, error) {
+	// truncate means delete contents on open, create if doesnt exist, write-only
+	const fileFlags = os.O_TRUNC | os.O_CREATE | os.O_WRONLY
+
+	// read = 4, write = 2, execute = 1; 6 = 4 + 2 (read write); 0 = octal; 666 = owner/group/others
+	const filePerm = 0666
+
+	file, err := os.OpenFile("log.txt", fileFlags, filePerm)
+	if err != nil {
+		return nil, err
+	}
+
+	log.SetOutput(file)
+	return file, nil
 }
 
 func clearAndDrawBuffer(buffer string) {

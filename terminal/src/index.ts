@@ -5,13 +5,12 @@ import * as ANSI from "./ANSI";
 // setup
 setup();
 
-
 // environment config
 const MAX_WIDTH = process.stdout.columns;
 const MAX_HEIGHT = process.stdout.rows;
 
 // game config
-const DEBUG_MODE = (process.env.DEBUG ?? "0") == "1";
+const DEBUG_MODE = (process.env.DEBUG ?? "0") == "1"; // TODO : ehhh might be better that logs save to a log file...? and can see in real time the tail of the logs?
 
 const FPS = 10;
 const DELTA_TIME_MS = 1000 / FPS
@@ -25,7 +24,23 @@ const CANVAS_HEIGHT = 10;
 const PADDING_Y = Math.floor((MAX_HEIGHT - CANVAS_HEIGHT) / 2);
 const PADDING_X = Math.floor((MAX_WIDTH - CANVAS_WIDTH) / 2);
 
-// game config - input
+// game config - input // TODO : change to WASD default, but allow config override
+const UP_KEY = "e"
+const DOWN_KEY = "d"
+const LEFT_KEY = "s"
+const RIGHT_KEY = "f"
+
+const UP_ACTION = "up"
+const DOWN_ACTION = "down"
+const LEFT_ACTION = "left"
+const RIGHT_ACTION = "right"
+
+const INPUT_MAP = new Map<string, string>([
+    [UP_KEY, UP_ACTION],
+    [DOWN_KEY, DOWN_ACTION],
+    [LEFT_KEY, LEFT_ACTION],
+    [RIGHT_KEY, RIGHT_ACTION],
+])
 
 // game config - display
 const PADDING_CHAR = " ";
@@ -35,7 +50,19 @@ const BG_CHAR = " ";
 const SNAKE_CHAR = "x";
 
 // init game logic
+const inputActionBuffer: string[] = [];
 const snakeHeadPos = [0, CANVAS_HEIGHT / 2]; // x,y
+const snakeDirection = [1, 0]
+
+function onInput(key: string) {
+    debug("Key:" + JSON.stringify(key));
+
+    // map key to action
+    if (INPUT_MAP.has(key)) {
+        const action = INPUT_MAP.get(key)!
+        inputActionBuffer.push(action);
+    }
+}
 
 // init draw
 const canvas = createCanvas();
@@ -44,10 +71,17 @@ debug("canvas height:" + canvas.length.toString())
 
 while (true) {
 
-    // TODO : poll input 
+    // poll input
+    // TODO : improve with input buffer logic (eg. quick up/left succession)
 
-    // game logic
-    snakeHeadPos[0] = (snakeHeadPos[0]! + 1) % CANVAS_WIDTH
+
+
+    // game logic - OnUpdate
+    snakeHeadPos[0] = (snakeHeadPos[0]! + snakeDirection[0]!) % CANVAS_WIDTH
+    snakeHeadPos[1] = (snakeHeadPos[1]! + snakeDirection[1]!) % CANVAS_HEIGHT
+
+    // game logic - OnAfterUpdate
+    inputActionBuffer.length = 0
 
     // draw
     resetCanvas(canvas);
@@ -201,13 +235,13 @@ function setup() {
 
     // input listeners
     process.stdin.on("data", (key: string) => {
-
-        debug("Key:" + JSON.stringify(key));
-
         // Ctrl+C sends character code 3
         if (key === "\u0003") {
             process.kill(process.pid, "SIGINT");
+            return;
         }
+
+        onInput(key);
     });
 }
 

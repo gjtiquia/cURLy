@@ -2,9 +2,9 @@ import * as ANSI from "./ANSI";
 
 // TODO : for rendering on web, <pre> seems faster than canvas
 
-process.on("exit", cleanup); // Regular exit
-process.on("SIGINT", cleanupAndExit); // Ctrl-C, does not exit by default, need to manually exit
-process.on("SIGTERM", cleanupAndExit); // Terminated by terminal
+// setup
+setup();
+
 
 // environment config
 const MAX_WIDTH = process.stdout.columns;
@@ -25,6 +25,9 @@ const CANVAS_HEIGHT = 10;
 const PADDING_Y = Math.floor((MAX_HEIGHT - CANVAS_HEIGHT) / 2);
 const PADDING_X = Math.floor((MAX_WIDTH - CANVAS_WIDTH) / 2);
 
+// game config - input
+
+// game config - display
 const PADDING_CHAR = " ";
 const BORDER_X_CHAR = "-";
 const BORDER_Y_CHAR = "|";
@@ -41,6 +44,8 @@ debug("canvas height:" + canvas.length.toString())
 
 while (true) {
 
+    // TODO : poll input 
+
     // game logic
     snakeHeadPos[0] = (snakeHeadPos[0]! + 1) % CANVAS_WIDTH
 
@@ -55,9 +60,6 @@ while (true) {
     // frame
     // TODO : can see multiplayer book on their suggested architecture
     await Bun.sleep(DELTA_TIME_MS);
-
-    if (DEBUG_MODE)
-        break;
 }
 
 function createCanvas() {
@@ -187,12 +189,31 @@ function clearAndDrawBuffer(buffer: string) {
     }
 }
 
-function cleanupAndExit() {
-    cleanup();
-    process.exit(0);
+function setup() {
+    process.stdin.setRawMode(true)
+    process.stdin.resume(); // necessary or else "data" event wont fire
+    process.stdin.setEncoding("utf8") // so can do string comparison on received keypresses
+
+    // cleanup listeners
+    process.on("exit", cleanup); // Regular exit on program end
+    process.on("SIGINT", cleanupAndExit); // Ctrl-C, does not exit by default, need to manually exit
+    process.on("SIGTERM", cleanupAndExit); // Terminated by terminal
+
+    // input listeners
+    process.stdin.on("data", (key: string) => {
+
+        debug("Key:" + JSON.stringify(key));
+
+        // Ctrl+C sends character code 3
+        if (key === "\u0003") {
+            process.kill(process.pid, "SIGINT");
+        }
+    });
 }
 
 function cleanup() {
+    process.stdin.setRawMode(false)
+
     if (DEBUG_MODE)
         return;
 
@@ -202,6 +223,11 @@ function cleanup() {
     else {
         console.clear();
     }
+}
+
+function cleanupAndExit() {
+    cleanup();
+    process.exit(0);
 }
 
 function debug(message: string) {

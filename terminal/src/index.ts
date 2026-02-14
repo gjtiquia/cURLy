@@ -229,7 +229,7 @@ function resetCanvas(canvas: string[][]) {
 
 function drawChar(canvas: string[][], x: number, y: number, char: string) {
     // canvas is drawn from top to bottom but game coordinates is from bottom to top
-    canvas[PADDING_Y + y]![PADDING_X + x] = char;
+    canvas[MAX_HEIGHT - (PADDING_Y + y) - 2]![PADDING_X + x] = char;
 }
 
 function canvasToStringBuffer(canvas: string[][]) {

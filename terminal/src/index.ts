@@ -11,14 +11,19 @@ const MAX_WIDTH = process.stdout.columns;
 const MAX_HEIGHT = process.stdout.rows;
 
 // game config
+const DEBUG_MODE = (process.env.DEBUG ?? "0") == "1";
+
 const FPS = 10;
 const DELTA_TIME_MS = 1000 / FPS
 
-const BORDER_X_THICKNESS = 2;
-const BORDER_Y_THICKNESS = 2;
+const BORDER_X_THICKNESS = 1;
+const BORDER_Y_THICKNESS = 1;
 
 const CANVAS_WIDTH = 40;
 const CANVAS_HEIGHT = 10;
+
+const PADDING_Y = Math.floor((MAX_HEIGHT - CANVAS_HEIGHT) / 2);
+const PADDING_X = Math.floor((MAX_WIDTH - CANVAS_WIDTH) / 2);
 
 const PADDING_CHAR = " ";
 const BORDER_X_CHAR = "-";
@@ -31,6 +36,8 @@ const snakeHeadPos = [0, CANVAS_HEIGHT / 2]; // x,y
 
 // init draw
 const canvas = createCanvas();
+debug("canvas width:" + canvas[0]!.length.toString())
+debug("canvas height:" + canvas.length.toString())
 
 while (true) {
 
@@ -48,114 +55,119 @@ while (true) {
     // frame
     // TODO : can see multiplayer book on their suggested architecture
     await Bun.sleep(DELTA_TIME_MS);
+
+    if (DEBUG_MODE)
+        break;
 }
 
 function createCanvas() {
     const canvas: string[][] = [];
-    for (let y = 0; y < CANVAS_HEIGHT; y++) {
+
+    // upper padding
+    for (let y = 0; y < PADDING_Y - BORDER_Y_THICKNESS; y++) {
         const row: string[] = [];
-        for (let x = 0; x < CANVAS_WIDTH; x++) {
-            row.push(BG_CHAR)
+        for (let x = 0; x < MAX_WIDTH; x++) {
+            row.push(PADDING_CHAR);
         }
         canvas.push(row);
     }
+
+    // upper border
+    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
+        const row: string[] = [];
+
+        // left padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        // render border
+        for (let x = 0; x < BORDER_X_THICKNESS + CANVAS_WIDTH + BORDER_X_THICKNESS; x++)
+            row.push(BORDER_X_CHAR)
+
+        // right padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        canvas.push(row);
+    }
+
+    // render canvas background
+    for (let y = 0; y < CANVAS_HEIGHT; y++) {
+        const row: string[] = [];
+
+        // left padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        // left border
+        for (let x = 0; x < BORDER_X_THICKNESS; x++)
+            row.push(BORDER_Y_CHAR)
+
+        // render
+        for (let x = 0; x < CANVAS_WIDTH; x++)
+            row.push(BG_CHAR);
+
+        // right border
+        for (let x = 0; x < BORDER_X_THICKNESS; x++)
+            row.push(BORDER_Y_CHAR)
+
+        // right padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        canvas.push(row);
+    }
+
+    // lower border
+    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
+        const row: string[] = [];
+
+        // left padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        // render border
+        for (let x = 0; x < BORDER_X_THICKNESS + CANVAS_WIDTH + BORDER_X_THICKNESS; x++)
+            row.push(BORDER_X_CHAR)
+
+        // right padding
+        for (let x = 0; x < PADDING_X - BORDER_X_THICKNESS; x++)
+            row.push(PADDING_CHAR)
+
+        canvas.push(row);
+    }
+
+    // lower padding
+    for (let y = 0; y < PADDING_Y; y++) {
+        const row: string[] = [];
+
+        for (let x = 0; x < MAX_WIDTH; x++) {
+            row.push(PADDING_CHAR);
+        }
+        canvas.push(row);
+    }
+
     return canvas;
 }
 
 function resetCanvas(canvas: string[][]) {
-    for (let y = 0; y < canvas.length; y++) {
-        for (let x = 0; x < canvas[y]!.length; x++) {
-            canvas[y]![x] = BG_CHAR
+    for (let y = 0; y < CANVAS_HEIGHT; y++) {
+        for (let x = 0; x < CANVAS_WIDTH; x++) {
+            drawChar(canvas, x, y, BG_CHAR)
         }
     }
     return canvas;
 }
 
 function drawChar(canvas: string[][], x: number, y: number, char: string) {
-    canvas[y]![x] = char;
+    canvas[PADDING_Y + y]![PADDING_X + x] = char;
 }
 
 function canvasToStringBuffer(canvas: string[][]) {
     let buffer = "";
 
-    const canvasHeight = canvas.length;
-    const canvasWidth = canvas[0]!.length
-
-    const yPadding = Math.floor((MAX_HEIGHT - canvasHeight) / 2);
-    const xPadding = Math.floor((MAX_WIDTH - canvasWidth) / 2);
-
-    // upper padding
-    for (let y = 0; y < yPadding - BORDER_Y_THICKNESS; y++) {
-        for (let x = 0; x < MAX_WIDTH; x++) {
-            buffer += PADDING_CHAR;
-        }
-        buffer += "\n"
-    }
-
-    // upper border
-    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
-        // left padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        // render border
-        for (let x = 0; x < BORDER_X_THICKNESS + canvasWidth + BORDER_X_THICKNESS; x++)
-            buffer += BORDER_X_CHAR
-
-        // right padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        buffer += "\n"
-    }
-
-    // render canvas
     for (let row of canvas) {
-
-        // left padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        // left border
-        for (let x = 0; x < BORDER_X_THICKNESS; x++)
-            buffer += BORDER_Y_CHAR
-
-        // render
         buffer += row.join("");
-
-        // right border
-        for (let x = 0; x < BORDER_X_THICKNESS; x++)
-            buffer += BORDER_Y_CHAR
-
-        // right padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        buffer += "\n"
-    }
-
-    // lower border
-    for (let y = 0; y < BORDER_Y_THICKNESS; y++) {
-        // left padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        // render border
-        for (let x = 0; x < BORDER_X_THICKNESS + canvasWidth + BORDER_X_THICKNESS; x++)
-            buffer += BORDER_X_CHAR
-
-        // right padding
-        for (let x = 0; x < xPadding - BORDER_X_THICKNESS; x++)
-            buffer += PADDING_CHAR
-
-        buffer += "\n"
-    }
-
-    // lower padding
-    for (let y = 0; y < yPadding; y++) {
-        for (let x = 0; x < MAX_WIDTH; x++) {
-            buffer += PADDING_CHAR;
-        }
         buffer += "\n"
     }
 
@@ -163,6 +175,9 @@ function canvasToStringBuffer(canvas: string[][]) {
 }
 
 function clearAndDrawBuffer(buffer: string) {
+    if (DEBUG_MODE)
+        return;
+
     if (ANSI.isANSISupported) {
         ANSI.clearAndDrawBuffer(buffer)
     }
@@ -178,6 +193,9 @@ function cleanupAndExit() {
 }
 
 function cleanup() {
+    if (DEBUG_MODE)
+        return;
+
     if (ANSI.isANSISupported) {
         ANSI.cleanup();
     }
@@ -186,3 +204,7 @@ function cleanup() {
     }
 }
 
+function debug(message: string) {
+    if (DEBUG_MODE)
+        console.log(message)
+}

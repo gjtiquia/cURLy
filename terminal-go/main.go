@@ -19,9 +19,26 @@ func main() {
 		log.Println(err)
 		return
 	}
+	cleanupLogTxt := func() { log.Println("cleanup log.txt"); file.Close() }
+	defer cleanupLogTxt()
 
-	defer onBeforeExit(file) // called at the end if no SIGINT or SIGTERM is received
-	go listenToSIGINTAndSIGTERM(func() { onBeforeExit(file) })
+	// TODO : make raw AFTER implementing Ctrl-C manual handling
+	// oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+	// cleanupRawMode := func() { log.Println("cleanup raw mode"); term.Restore(int(os.Stdin.Fd()), oldState) }
+	// defer cleanupRawMode()
+
+	cleanupAnsi := func() { log.Println("cleanup ansi"); ansi.Cleanup() }
+	defer cleanupAnsi()
+
+	go listenToSIGINTAndSIGTERM(func() {
+		cleanupAnsi()
+		// cleanupRawMode()
+		cleanupLogTxt()
+	})
 
 	// init game state
 	GAME_CONFIG := createGameConfig()
@@ -251,12 +268,4 @@ func canvasToStringBuffer(canvas [][]string) string {
 }
 func clearAndDrawBuffer(buffer string) {
 	ansi.ClearAndDrawBuffer(buffer)
-}
-
-func onBeforeExit(logFile *os.File) {
-	log.Println("onBeforeExit: cleanup")
-	ansi.Cleanup()
-
-	log.Println("onBeforeExit: close log.txt")
-	logFile.Close()
 }

@@ -1,4 +1,4 @@
-import * as ANSI from "./ANSI";
+import * as ansi from "./ansi";
 
 // TODO : for rendering on web, <pre> seems faster than canvas
 
@@ -247,8 +247,8 @@ function clearAndDrawBuffer(buffer: string) {
     if (DEBUG_MODE)
         return;
 
-    if (ANSI.isANSISupported) {
-        ANSI.clearAndDrawBuffer(buffer)
+    if (ansi.isANSISupported) {
+        ansi.clearAndDrawBuffer(buffer)
     }
     else {
         console.clear();
@@ -284,8 +284,8 @@ function cleanup() {
     if (DEBUG_MODE)
         return;
 
-    if (ANSI.isANSISupported) {
-        ANSI.cleanup();
+    if (ansi.isANSISupported) {
+        ansi.cleanup();
     }
     else {
         console.clear();

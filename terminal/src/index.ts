@@ -25,10 +25,15 @@ const PADDING_Y = Math.floor((MAX_HEIGHT - CANVAS_HEIGHT) / 2);
 const PADDING_X = Math.floor((MAX_WIDTH - CANVAS_WIDTH) / 2);
 
 // game config - input // TODO : change to WASD default, but allow config override
-const UP_KEY = "e"
-const DOWN_KEY = "d"
-const LEFT_KEY = "s"
-const RIGHT_KEY = "f"
+const UP_KEY_VAR_1 = "e"
+const DOWN_KEY_VAR_1 = "d"
+const LEFT_KEY_VAR_1 = "s"
+const RIGHT_KEY_VAR_1 = "f"
+
+const UP_KEY_VAR_2 = "\u001b[A" // arrow up
+const DOWN_KEY_VAR_2 = "\u001b[B" // arrow down
+const LEFT_KEY_VAR_2 = "\u001b[D" // arrow left
+const RIGHT_KEY_VAR_2 = "\u001b[C" // arrow right
 
 const UP_ACTION = "up"
 const DOWN_ACTION = "down"
@@ -36,10 +41,14 @@ const LEFT_ACTION = "left"
 const RIGHT_ACTION = "right"
 
 const INPUT_MAP = new Map<string, string>([
-    [UP_KEY, UP_ACTION],
-    [DOWN_KEY, DOWN_ACTION],
-    [LEFT_KEY, LEFT_ACTION],
-    [RIGHT_KEY, RIGHT_ACTION],
+    [UP_KEY_VAR_1, UP_ACTION],
+    [DOWN_KEY_VAR_1, DOWN_ACTION],
+    [LEFT_KEY_VAR_1, LEFT_ACTION],
+    [RIGHT_KEY_VAR_1, RIGHT_ACTION],
+    [UP_KEY_VAR_2, UP_ACTION],
+    [DOWN_KEY_VAR_2, DOWN_ACTION],
+    [LEFT_KEY_VAR_2, LEFT_ACTION],
+    [RIGHT_KEY_VAR_2, RIGHT_ACTION],
 ])
 
 // game config - display
@@ -55,12 +64,14 @@ const snakeHeadPos = [0, CANVAS_HEIGHT / 2]; // x,y
 const snakeDirection = [1, 0]
 
 function onInput(key: string) {
-    debug("Key:" + JSON.stringify(key));
+    // debug("Key:" + JSON.stringify(key));
 
     // map key to action
     if (INPUT_MAP.has(key)) {
         const action = INPUT_MAP.get(key)!
         inputActionBuffer.push(action);
+
+        debug("Action:" + action);
     }
 }
 

@@ -14,10 +14,13 @@ export function clearAndDrawBuffer(buffer: string) {
     process.stdout.write(CLEAR + HIDE_CURSOR + CURSOR_HOME + buffer + RESET);
 }
 
-export function cleanup() {
+export function cleanup(clear = true) {
     if (!isANSISupported)
         return;
 
-    process.stdout.write(CLEAR + CURSOR_HOME + SHOW_CURSOR);
+    if (clear)
+        process.stdout.write(CLEAR + CURSOR_HOME + SHOW_CURSOR);
+    else
+        process.stdout.write(SHOW_CURSOR);
 }
 

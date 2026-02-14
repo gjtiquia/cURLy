@@ -281,14 +281,15 @@ function setup() {
 function cleanup() {
     process.stdin.setRawMode(false)
 
-    if (DEBUG_MODE)
-        return;
+    // only clear the terminal if not in debug mode
+    const clear = DEBUG_MODE == false
 
     if (ansi.isANSISupported) {
-        ansi.cleanup();
+        ansi.cleanup(clear);
     }
     else {
-        console.clear();
+        if (clear)
+            console.clear();
     }
 }
 

@@ -18,6 +18,8 @@ import (
 // - listenForInput: assumption of 3 bytes is wrong, terminal may send the bytes split
 // - listenForInput: assumption of 3 bytes will only handle the first byte and drop the other bytes
 // - listenForInput: inputCh is unbuffered, so sends will be blocked if main does not receive, eg. in a long gameLoop or durin sleep, leading to loss of key presses
+// - should drain input on tick
+// - tick should hv elapsedTime and sleep for deltaTime (or ticker in Go)
 
 func main() {
 	// logging setup

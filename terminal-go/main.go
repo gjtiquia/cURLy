@@ -48,7 +48,7 @@ func main() {
 	go listenForInput(inputCh, errCh)
 
 	// game setup
-	gameConfig, gameState, canvas := createGame()
+	gameConfig, gameState, canvas, inputBuffer := createGame()
 
 	for {
 		select {
@@ -62,26 +62,30 @@ func main() {
 				errCh <- errors.New("input: Exit")
 				continue
 			}
-			handleInput(inputAction)
+			inputBuffer = append(inputBuffer, inputAction)
 
 		default:
 			// TODO : see multiplayer book suggested architecture
-			runGameLoop(gameConfig, gameState, canvas)
+
+			runGameLoop(gameConfig, gameState, canvas, inputBuffer)
+			inputBuffer = inputBuffer[:0]
+
 			time.Sleep(time.Duration(gameConfig.DELTA_TIME_MS) * time.Millisecond)
 		}
 	}
 }
 
-func createGame() (GameConfig, GameState, GameCanvas) {
+func createGame() (GameConfig, *GameState, GameCanvas, []InputAction) {
 	gameConfig := createGameConfig()
 	gameState := createGameState()
 	canvas := createCanvas(gameConfig)
-	return gameConfig, gameState, canvas
+	inputBuffer := make([]InputAction, 0)
+	return gameConfig, gameState, canvas, inputBuffer
 }
 
-func runGameLoop(gameConfig GameConfig, gameState GameState, canvas GameCanvas) {
+func runGameLoop(gameConfig GameConfig, gameState *GameState, canvas GameCanvas, inputBuffer []InputAction) {
 	// game logic
-	gameState.onUpdate(gameConfig)
+	gameState.onUpdate(gameConfig, inputBuffer)
 
 	// draw
 	canvas.resetCanvas(gameConfig)
@@ -247,14 +251,32 @@ type GameState struct {
 	snakeDirection Vector2
 }
 
-func createGameState() GameState {
-	return GameState{
+func createGameState() *GameState {
+	gameState := GameState{
 		snakeHeadPos:   Vector2{0, 0},
 		snakeDirection: Vector2{1, 0},
 	}
+	return &gameState
 }
 
-func (this GameState) onUpdate(gameConfig GameConfig) {
+func (this *GameState) onUpdate(gameConfig GameConfig, inputBuffer []InputAction) {
+
+	// TODO : for now just get the most recent input action
+	if len(inputBuffer) > 0 {
+		inputAction := inputBuffer[len(inputBuffer)-1]
+
+		switch {
+		case inputAction == Up:
+			this.snakeDirection = Vector2{0, 1}
+		case inputAction == Down:
+			this.snakeDirection = Vector2{0, -1}
+		case inputAction == Left:
+			this.snakeDirection = Vector2{-1, 0}
+		case inputAction == Right:
+			this.snakeDirection = Vector2{1, 0}
+		}
+	}
+
 	// update snake head pos
 	this.snakeHeadPos = this.snakeHeadPos.Add(this.snakeDirection)
 
@@ -354,7 +376,10 @@ func (canvas GameCanvas) toStringBuffer() string {
 		for _, element := range row {
 			buffer.WriteString(element)
 		}
-		buffer.WriteString("\n")
+		// Raw mode: terminal does not translate \n to \r\n
+		// so LF (\n) alone only moves down, not to column 0
+		// Use \r\n so each line starts at the left
+		buffer.WriteString("\r\n")
 	}
 
 	return buffer.String()

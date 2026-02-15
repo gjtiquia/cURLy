@@ -19,8 +19,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	cleanupLogTxt := func() { log.Println("cleanup log.txt"); file.Close() }
-	defer cleanupLogTxt()
+	defer file.Close()
 
 	// TODO : make raw AFTER implementing Ctrl-C manual handling
 	// oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
@@ -31,59 +30,52 @@ func main() {
 	// cleanupRawMode := func() { log.Println("cleanup raw mode"); term.Restore(int(os.Stdin.Fd()), oldState) }
 	// defer cleanupRawMode()
 
-	cleanupAnsi := func() { log.Println("cleanup ansi"); ansi.Cleanup() }
-	defer cleanupAnsi()
+	ansi.ClearAndHideCursor()
+	defer ansi.ClearAndShowCursor()
 
-	go listenToSIGINTAndSIGTERM(func() {
-		cleanupAnsi()
-		// cleanupRawMode()
-		cleanupLogTxt()
-	})
+	sigCh := make(chan os.Signal)
+	go listenToSIGINTAndSIGTERM(sigCh)
 
-	// init game state
-	GAME_CONFIG := createGameConfig()
-	canvas := createCanvas(GAME_CONFIG)
-	snakeHeadPos := Vector2{0, 0}
-	snakeDirection := Vector2{1, 0}
+	gameConfig, gameState, canvas := createGame()
 
-	// game loop
-	for { // "'while' is spelled 'for' in Go"
+	for {
+		select {
 
-		// TODO : poll input
+		// TODO : listen to inputs
 
-		// game logic - OnUpdate
+		case signal := <-sigCh:
+			log.Println("main.sigCh:", signal)
+			return
 
-		// update snake head pos
-		snakeHeadPos = snakeHeadPos.Add(snakeDirection)
-
-		// wrap around canvas edge
-		snakeHeadPos.x = snakeHeadPos.x % GAME_CONFIG.CANVAS_SIZE.x
-		snakeHeadPos.y = snakeHeadPos.y % GAME_CONFIG.CANVAS_SIZE.y
-		if snakeHeadPos.x < 0 {
-			snakeHeadPos.x += GAME_CONFIG.CANVAS_SIZE.x
+		default:
+			// TODO : see multiplayer book suggested architecture
+			runGameLoop(gameConfig, gameState, canvas)
+			time.Sleep(time.Duration(gameConfig.DELTA_TIME_MS) * time.Millisecond)
 		}
-		if snakeHeadPos.y < 0 {
-			snakeHeadPos.y += GAME_CONFIG.CANVAS_SIZE.y
-		}
-
-		// game logic - OnAfterUpdate
-		// TODO : reset input buffer
-
-		// draw
-		resetCanvas(canvas, GAME_CONFIG)
-		drawChar(canvas, snakeHeadPos, GAME_CONFIG.SNAKE_CHAR, GAME_CONFIG)
-
-		// render
-		buffer := canvasToStringBuffer(canvas)
-		clearAndDrawBuffer(buffer)
-
-		// frame
-		// TODO : see multiplayer book suggested architecture
-		time.Sleep(time.Duration(GAME_CONFIG.DELTA_TIME_MS) * time.Millisecond)
 	}
 }
 
-func listenToSIGINTAndSIGTERM(onBeforeExit func()) {
+func createGame() (GameConfig, GameState, GameCanvas) {
+	gameConfig := createGameConfig()
+	gameState := createGameState()
+	canvas := createCanvas(gameConfig)
+	return gameConfig, gameState, canvas
+}
+
+func runGameLoop(gameConfig GameConfig, gameState GameState, canvas GameCanvas) {
+	// game logic
+	gameState.onUpdate(gameConfig)
+
+	// draw
+	canvas.resetCanvas(gameConfig)
+	gameState.onDraw(gameConfig, canvas)
+
+	// render
+	buffer := canvas.toStringBuffer()
+	ansi.ClearAndDrawBuffer(buffer)
+}
+
+func listenToSIGINTAndSIGTERM(outCh chan os.Signal) {
 	// create a channel, type os.Signal, buffer 1 (required by signal.Notify)
 	channel := make(chan os.Signal, 1)
 
@@ -91,14 +83,11 @@ func listenToSIGINTAndSIGTERM(onBeforeExit func()) {
 	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
 
 	// blocked until receives a notification from channel
-	receivedSignal := <-channel // go does not allow unused variables
+	receivedSignal := <-channel
 	log.Println("receivedSignal:", receivedSignal)
 
-	// need to manually call cuz deferred calls will not be called after exit
-	onBeforeExit()
-
-	// caught the signal myself, so also need to exit myself, as it overrides the default behavior
-	os.Exit(0)
+	// notify outside
+	outCh <- receivedSignal
 }
 
 func initLogTxt() (*os.File, error) {
@@ -181,8 +170,41 @@ func createGameConfig() GameConfig {
 	}
 }
 
-func createCanvas(config GameConfig) [][]string {
-	canvas := [][]string{}
+type GameState struct {
+	snakeHeadPos   Vector2
+	snakeDirection Vector2
+}
+
+func createGameState() GameState {
+	return GameState{
+		snakeHeadPos:   Vector2{0, 0},
+		snakeDirection: Vector2{1, 0},
+	}
+}
+
+func (this GameState) onUpdate(gameConfig GameConfig) {
+	// update snake head pos
+	this.snakeHeadPos = this.snakeHeadPos.Add(this.snakeDirection)
+
+	// wrap around canvas edge
+	this.snakeHeadPos.x = this.snakeHeadPos.x % gameConfig.CANVAS_SIZE.x
+	this.snakeHeadPos.y = this.snakeHeadPos.y % gameConfig.CANVAS_SIZE.y
+	if this.snakeHeadPos.x < 0 {
+		this.snakeHeadPos.x += gameConfig.CANVAS_SIZE.x
+	}
+	if this.snakeHeadPos.y < 0 {
+		this.snakeHeadPos.y += gameConfig.CANVAS_SIZE.y
+	}
+}
+
+func (this GameState) onDraw(gameConfig GameConfig, canvas GameCanvas) {
+	canvas.drawChar(this.snakeHeadPos, gameConfig.SNAKE_CHAR, gameConfig)
+}
+
+type GameCanvas [][]string
+
+func createCanvas(config GameConfig) GameCanvas {
+	canvas := GameCanvas{}
 
 	// upper padding
 	for y := 0; y < config.TERM_SIZE.y; y++ {
@@ -240,21 +262,20 @@ func createCanvas(config GameConfig) [][]string {
 	return canvas
 }
 
-func resetCanvas(canvas [][]string, config GameConfig) [][]string {
+func (this GameCanvas) resetCanvas(config GameConfig) {
 	for y := 0; y < config.CANVAS_SIZE.y; y++ {
 		for x := 0; x < config.CANVAS_SIZE.x; x++ {
-			drawChar(canvas, Vector2{x, y}, config.BG_CHAR, config)
+			this.drawChar(Vector2{x, y}, config.BG_CHAR, config)
 		}
 	}
-	return canvas
 }
 
-func drawChar(canvas [][]string, position Vector2, char string, config GameConfig) {
+func (this GameCanvas) drawChar(position Vector2, char string, config GameConfig) {
 	// canvas is drawn from top to bottom but game coordinates is from bottom to top
-	canvas[config.TERM_SIZE.y-(config.PADDING.y+position.y)-2][config.PADDING.x+position.x] = char
+	this[config.TERM_SIZE.y-(config.PADDING.y+position.y)-2][config.PADDING.x+position.x] = char
 }
 
-func canvasToStringBuffer(canvas [][]string) string {
+func (canvas GameCanvas) toStringBuffer() string {
 	var buffer strings.Builder
 
 	for _, row := range canvas {
@@ -265,7 +286,4 @@ func canvasToStringBuffer(canvas [][]string) string {
 	}
 
 	return buffer.String()
-}
-func clearAndDrawBuffer(buffer string) {
-	ansi.ClearAndDrawBuffer(buffer)
 }

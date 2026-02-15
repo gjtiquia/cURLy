@@ -24,8 +24,12 @@ func main() {
 	defer file.Close()
 	defer log.Println("main: terminating...")
 
+	// error channel setup
+	// buffered so main can send to it on Exit without deadlocking
+	// cuz we send and receive on the same goroutine main(), if it is unbuffered, and we send, since nobody is receiving, it will remain blocked, causing deadlock
+	errCh := make(chan error, 1)
+
 	// Ctrl-C setup
-	errCh := make(chan error)
 	go listenForSIGINTAndSIGTERM(errCh) // manually handle Ctrl-C or else defers wont call
 
 	// display setup
@@ -33,12 +37,12 @@ func main() {
 	defer ansi.ClearAndShowCursor()
 
 	// input setup
-	// oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	// defer term.Restore(int(os.Stdin.Fd()), oldState)
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
 	inputCh := make(chan InputAction)
 	go listenForInput(inputCh, errCh)

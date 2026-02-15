@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"math"
 	"os"
@@ -14,38 +15,50 @@ import (
 )
 
 func main() {
+	// logging setup
 	file, err := initLogTxt()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	defer file.Close()
+	defer log.Println("main: terminating...")
 
-	// TODO : make raw AFTER implementing Ctrl-C manual handling
+	// Ctrl-C setup
+	errCh := make(chan error)
+	go listenForSIGINTAndSIGTERM(errCh) // manually handle Ctrl-C or else defers wont call
+
+	// display setup
+	ansi.ClearAndHideCursor()
+	defer ansi.ClearAndShowCursor()
+
+	// input setup
 	// oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	// if err != nil {
 	// 	log.Println(err)
 	// 	return
 	// }
-	// cleanupRawMode := func() { log.Println("cleanup raw mode"); term.Restore(int(os.Stdin.Fd()), oldState) }
-	// defer cleanupRawMode()
+	// defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	ansi.ClearAndHideCursor()
-	defer ansi.ClearAndShowCursor()
+	inputCh := make(chan InputAction)
+	go listenForInput(inputCh, errCh)
 
-	sigCh := make(chan os.Signal)
-	go listenToSIGINTAndSIGTERM(sigCh)
-
+	// game setup
 	gameConfig, gameState, canvas := createGame()
 
 	for {
 		select {
 
-		// TODO : listen to inputs
-
-		case signal := <-sigCh:
-			log.Println("main.sigCh:", signal)
+		case error := <-errCh:
+			log.Println("main.errCh:", error)
 			return
+
+		case inputAction := <-inputCh:
+			if inputAction == Exit {
+				errCh <- errors.New("input: Exit")
+				continue
+			}
+			handleInput(inputAction)
 
 		default:
 			// TODO : see multiplayer book suggested architecture
@@ -75,7 +88,7 @@ func runGameLoop(gameConfig GameConfig, gameState GameState, canvas GameCanvas) 
 	ansi.ClearAndDrawBuffer(buffer)
 }
 
-func listenToSIGINTAndSIGTERM(outCh chan os.Signal) {
+func listenForSIGINTAndSIGTERM(errCh chan error) {
 	// create a channel, type os.Signal, buffer 1 (required by signal.Notify)
 	channel := make(chan os.Signal, 1)
 
@@ -84,10 +97,65 @@ func listenToSIGINTAndSIGTERM(outCh chan os.Signal) {
 
 	// blocked until receives a notification from channel
 	receivedSignal := <-channel
-	log.Println("receivedSignal:", receivedSignal)
 
 	// notify outside
-	outCh <- receivedSignal
+	errCh <- errors.New("listenForSIGINTAndSIGTERM: " + receivedSignal.String())
+}
+
+type InputAction int
+
+const (
+	None InputAction = iota
+	Up
+	Down
+	Left
+	Right
+	Exit
+)
+
+func listenForInput(inputCh chan InputAction, errCh chan error) {
+	buf := make([]byte, 3) // read up to 3 bytes, eg. arrows = 3 byte escape sequence
+	for {
+		n, err := os.Stdin.Read(buf)
+		if err != nil {
+			errCh <- errors.New("listenForInput: " + err.Error())
+			return
+		}
+
+		// Handle Escape Sequences (Arrows)
+		if n == 3 && buf[0] == 27 && buf[1] == 91 {
+			switch buf[2] {
+			case 65:
+				inputCh <- Up
+			case 66:
+				inputCh <- Down
+			case 67:
+				inputCh <- Right
+			case 68:
+				inputCh <- Left
+			}
+			continue
+		}
+
+		// Handle Single Bytes
+		switch buf[0] {
+		case 3: // Ctrl+C
+			log.Println("listenForInput: Ctrl+C")
+			inputCh <- Exit
+		case 'w':
+			inputCh <- Up
+		case 's':
+			inputCh <- Down
+		case 'a':
+			inputCh <- Left
+		case 'd':
+			inputCh <- Right
+		}
+	}
+}
+
+func handleInput(action InputAction) {
+	log.Println("input", action)
 }
 
 func initLogTxt() (*os.File, error) {

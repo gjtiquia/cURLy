@@ -17,7 +17,6 @@ import (
 // TODO : issues
 // - listenForInput: assumption of 3 bytes is wrong, terminal may send the bytes split
 // - listenForInput: assumption of 3 bytes will only handle the first byte and drop the other bytes
-// - tick should hv elapsedTime and sleep for deltaTime (or ticker in Go)
 
 func main() {
 	// logging setup
@@ -65,6 +64,8 @@ func main() {
 		default:
 			// TODO : see multiplayer book suggested architecture
 
+			startTime := time.Now()
+
 			inputBuffer, err = drainInputToBuffer(inputCh, inputBuffer)
 			if err != nil {
 				errCh <- err
@@ -73,7 +74,11 @@ func main() {
 
 			runGameLoop(gameConfig, gameState, canvas, inputBuffer)
 
-			time.Sleep(time.Duration(gameConfig.DELTA_TIME_MS) * time.Millisecond)
+			elapsedTime := time.Since(startTime)
+			remainingTime := gameConfig.DELTA_TIME - elapsedTime
+			if remainingTime > 0 {
+				time.Sleep(remainingTime)
+			}
 		}
 	}
 }
@@ -212,8 +217,8 @@ func (this Vector2) Add(other Vector2) Vector2 {
 }
 
 type GameConfig struct {
-	FPS           int
-	DELTA_TIME_MS int
+	FPS        int
+	DELTA_TIME time.Duration
 
 	TERM_SIZE        Vector2
 	BORDER_THICKNESS Vector2
@@ -250,8 +255,8 @@ func createGameConfig() GameConfig {
 	log.Printf("canvas: %vx%v", CANVAS_SIZE.x, CANVAS_SIZE.y)
 
 	return GameConfig{
-		FPS:           10,
-		DELTA_TIME_MS: 1000 / FPS,
+		FPS:        FPS,
+		DELTA_TIME: 1000 / FPS * time.Millisecond,
 
 		CANVAS_SIZE:      CANVAS_SIZE,
 		BORDER_THICKNESS: BORDER_THICKNESS,

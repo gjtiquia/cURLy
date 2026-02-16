@@ -17,6 +17,8 @@ import (
 // TODO : issues
 // - listenForInput: assumption of 3 bytes is wrong, terminal may send the bytes split
 // - listenForInput: assumption of 3 bytes will only handle the first byte and drop the other bytes
+// - screen flicker (maybe solved by not clearing the entire screen and only printing the diffs...????)
+// - should probably migrate to a low level package like tcell to help deal with these "annoying low level parts"?
 
 func main() {
 	// logging setup
@@ -333,9 +335,9 @@ func createCanvas(config GameConfig) GameCanvas {
 	borderBottom := config.PADDING.y + config.CANVAS_SIZE.y // exclusive for canvas, inclusive for border
 
 	canvasLeft := config.PADDING.x
-	canvasRight := config.PADDING.x + config.CANVAS_SIZE.x   // exclusive
+	canvasRight := config.PADDING.x + config.CANVAS_SIZE.x // exclusive
 	canvasTop := config.PADDING.y
-	canvasBottom := config.PADDING.y + config.CANVAS_SIZE.y  // exclusive
+	canvasBottom := config.PADDING.y + config.CANVAS_SIZE.y // exclusive
 
 	for y := 0; y < config.TERM_SIZE.y; y++ {
 		row := []string{}

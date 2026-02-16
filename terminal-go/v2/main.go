@@ -25,6 +25,15 @@ func main() {
 	if err := s.Init(); err != nil {
 		log.Panicf("%+v", err)
 	}
+	defer func() {
+		// You have to catch panics in a defer, clean up, and re-raise them - otherwise your application can die without leaving any diagnostic trace.
+		// https://github.com/gdamore/tcell/blob/main/TUTORIAL.md
+		maybePanic := recover()
+		s.Fini()
+		if maybePanic != nil {
+			panic(maybePanic)
+		}
+	}()
 
 	// Set default text style
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
@@ -39,10 +48,6 @@ func main() {
 
 	s.PutStr(0, 1, "Hello World!")
 
-	quit := func() {
-		s.Fini()
-		os.Exit(0)
-	}
 	for {
 		// Update screen
 		s.Show()
@@ -56,7 +61,7 @@ func main() {
 			s.Sync()
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				quit()
+				return
 			}
 		}
 	}

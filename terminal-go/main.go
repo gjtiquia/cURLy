@@ -17,8 +17,6 @@ import (
 // TODO : issues
 // - listenForInput: assumption of 3 bytes is wrong, terminal may send the bytes split
 // - listenForInput: assumption of 3 bytes will only handle the first byte and drop the other bytes
-// - listenForInput: inputCh is unbuffered, so sends will be blocked if main does not receive, eg. in a long gameLoop or durin sleep, leading to loss of key presses
-// - should drain input on tick
 // - tick should hv elapsedTime and sleep for deltaTime (or ticker in Go)
 
 func main() {
@@ -51,7 +49,7 @@ func main() {
 	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	inputCh := make(chan InputAction)
+	inputCh := make(chan InputAction, 64) // buffered so that sends wont be blocking
 	go listenForInput(inputCh, errCh)
 
 	// game setup
@@ -64,18 +62,16 @@ func main() {
 			log.Println("main.errCh:", error)
 			return
 
-		case inputAction := <-inputCh:
-			if inputAction == Exit {
-				errCh <- errors.New("input: Exit")
-				continue
-			}
-			inputBuffer = append(inputBuffer, inputAction)
-
 		default:
 			// TODO : see multiplayer book suggested architecture
 
+			inputBuffer, err = drainInputToBuffer(inputCh, inputBuffer)
+			if err != nil {
+				errCh <- err
+				continue
+			}
+
 			runGameLoop(gameConfig, gameState, canvas, inputBuffer)
-			inputBuffer = inputBuffer[:0]
 
 			time.Sleep(time.Duration(gameConfig.DELTA_TIME_MS) * time.Millisecond)
 		}
@@ -88,6 +84,23 @@ func createGame() (GameConfig, *GameState, GameCanvas, []InputAction) {
 	canvas := createCanvas(gameConfig)
 	inputBuffer := make([]InputAction, 0)
 	return gameConfig, gameState, canvas, inputBuffer
+}
+
+func drainInputToBuffer(inputCh chan InputAction, inputBuffer []InputAction) ([]InputAction, error) {
+	inputBuffer = inputBuffer[:0]
+drain:
+	for {
+		select {
+		case inputAction := <-inputCh:
+			if inputAction == Exit {
+				return inputBuffer, errors.New("input: Exit")
+			}
+			inputBuffer = append(inputBuffer, inputAction)
+		default:
+			break drain
+		}
+	}
+	return inputBuffer, nil
 }
 
 func runGameLoop(gameConfig GameConfig, gameState *GameState, canvas GameCanvas, inputBuffer []InputAction) {

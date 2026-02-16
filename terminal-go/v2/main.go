@@ -11,29 +11,18 @@ import (
 
 func main() {
 	// logging setup
-	logPanicAndCloseFile, err := InitLogFile("log.txt")
+	err, logPanicAndCloseFile := InitLogFile("log.txt")
 	if err != nil {
 		log.Panicf("%+v", errors.WithStack(err))
 	}
 	defer logPanicAndCloseFile()
 
 	// tcell setup
-	s, err := tcell.NewScreen()
+	s, err, finalizeScreen := InitTCellScreen()
 	if err != nil {
 		log.Panicf("%+v", err)
 	}
-	if err := s.Init(); err != nil {
-		log.Panicf("%+v", err)
-	}
-	defer func() {
-		// You have to catch panics in a defer, clean up, and re-raise them - otherwise your application can die without leaving any diagnostic trace.
-		// https://github.com/gdamore/tcell/blob/main/TUTORIAL.md
-		maybePanic := recover()
-		s.Fini()
-		if maybePanic != nil {
-			panic(maybePanic)
-		}
-	}()
+	defer finalizeScreen()
 
 	// Set default text style
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
@@ -67,7 +56,7 @@ func main() {
 	}
 }
 
-func InitLogFile(filename string) (logPanicAndCloseFile func(), err error) {
+func InitLogFile(filename string) (err error, logPanicAndCloseFile func()) {
 	// truncate means delete contents on open, create if doesnt exist, write-only
 	const fileFlags = os.O_TRUNC | os.O_CREATE | os.O_WRONLY
 
@@ -76,7 +65,7 @@ func InitLogFile(filename string) (logPanicAndCloseFile func(), err error) {
 
 	file, err := os.OpenFile(filename, fileFlags, filePerm)
 	if err != nil {
-		return nil, err
+		return err, nil
 	}
 
 	log.SetOutput(file)
@@ -87,5 +76,27 @@ func InitLogFile(filename string) (logPanicAndCloseFile func(), err error) {
 			log.Panicf("%+v", r)
 		}
 	}
-	return logPanicAndCloseFile, nil
+	return nil, logPanicAndCloseFile
+}
+
+func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
+	s, err = tcell.NewScreen()
+	if err != nil {
+		return nil, err, nil
+	}
+	if err = s.Init(); err != nil {
+		return nil, err, nil
+	}
+
+	finalizeScreen = func() {
+		// You have to catch panics in a defer, clean up, and re-raise them - otherwise your application can die without leaving any diagnostic trace.
+		// https://github.com/gdamore/tcell/blob/main/TUTORIAL.md
+		maybePanic := recover()
+		s.Fini()
+		if maybePanic != nil {
+			panic(maybePanic)
+		}
+	}
+
+	return s, nil, finalizeScreen
 }

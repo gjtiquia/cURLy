@@ -11,25 +11,19 @@ import (
 
 func main() {
 	// logging setup
-	file, err := InitLogFile("log.txt")
+	logPanicAndCloseFile, err := InitLogFile("log.txt")
 	if err != nil {
 		log.Panicf("%+v", errors.WithStack(err))
 	}
-	defer file.Close()
-	defer LogPanicBeforeFileClose()
-
-	// TODO : remove
-	// panic(errors.WithStack(errors.New("hi i am panicking")))
+	defer logPanicAndCloseFile()
 
 	// tcell setup
 	s, err := tcell.NewScreen()
 	if err != nil {
-		log.Printf("%+v", err)
-		return
+		log.Panicf("%+v", err)
 	}
 	if err := s.Init(); err != nil {
-		log.Printf("%+v", err)
-		return
+		log.Panicf("%+v", err)
 	}
 
 	// Set default text style
@@ -68,7 +62,7 @@ func main() {
 	}
 }
 
-func InitLogFile(filename string) (*os.File, error) {
+func InitLogFile(filename string) (logPanicAndCloseFile func(), err error) {
 	// truncate means delete contents on open, create if doesnt exist, write-only
 	const fileFlags = os.O_TRUNC | os.O_CREATE | os.O_WRONLY
 
@@ -81,12 +75,12 @@ func InitLogFile(filename string) (*os.File, error) {
 	}
 
 	log.SetOutput(file)
-	return file, nil
-}
-
-func LogPanicBeforeFileClose() {
-	if r := recover(); r != nil {
-		log.Println("logging panic before file close")
-		log.Panicf("%+v", r)
+	logPanicAndCloseFile = func() {
+		defer file.Close()
+		if r := recover(); r != nil {
+			log.Println("logging panic before file close")
+			log.Panicf("%+v", r)
+		}
 	}
+	return logPanicAndCloseFile, nil
 }

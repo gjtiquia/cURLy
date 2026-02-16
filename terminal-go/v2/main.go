@@ -18,18 +18,11 @@ func main() {
 	defer logPanicAndCloseFile()
 
 	// tcell setup
-	s, err, finalizeScreen := InitTCellScreen()
+	s, defStyle, err, finalizeScreen := InitTCellScreen()
 	if err != nil {
 		log.Panicf("%+v", err)
 	}
 	defer finalizeScreen()
-
-	// Set default text style
-	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
-	s.SetStyle(defStyle)
-
-	// Clear screen
-	s.Clear()
 
 	s.Put(0, 0, "H", defStyle)
 	s.Put(1, 0, "i", defStyle)
@@ -79,14 +72,22 @@ func InitLogFile(filename string) (err error, logPanicAndCloseFile func()) {
 	return nil, logPanicAndCloseFile
 }
 
-func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
+func InitTCellScreen() (s tcell.Screen, defStyle tcell.Style, err error, finalizeScreen func()) {
+	defStyle = tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+
 	s, err = tcell.NewScreen()
 	if err != nil {
-		return nil, err, nil
+		return nil, defStyle, err, nil
 	}
 	if err = s.Init(); err != nil {
-		return nil, err, nil
+		return nil, defStyle, err, nil
 	}
+
+	// Set default text style
+	s.SetStyle(defStyle)
+
+	// Clear screen
+	s.Clear()
 
 	finalizeScreen = func() {
 		// You have to catch panics in a defer, clean up, and re-raise them - otherwise your application can die without leaving any diagnostic trace.
@@ -98,5 +99,5 @@ func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
 		}
 	}
 
-	return s, nil, finalizeScreen
+	return s, defStyle, nil, finalizeScreen
 }

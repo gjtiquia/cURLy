@@ -22,6 +22,7 @@ type GameConfig struct {
 	BORDER_Y_CHAR string
 	BG_CHAR       string
 	SNAKE_CHAR    string
+	FOOD_CHAR     string
 }
 
 func createGameConfig(termWidth, termHeight int) GameConfig {
@@ -52,6 +53,7 @@ func createGameConfig(termWidth, termHeight int) GameConfig {
 		BORDER_X_CHAR: "-",
 		BORDER_Y_CHAR: "|",
 		BG_CHAR:       " ",
-		SNAKE_CHAR:    "x",
+		SNAKE_CHAR:    "O",
+		FOOD_CHAR:     "*",
 	}
 }

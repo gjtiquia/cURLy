@@ -47,9 +47,9 @@ func main() {
 
 func createGame(s tcell.Screen) (GameConfig, *GameState, GameCanvas, []InputAction) {
 	gameConfig := createGameConfig(s.Size())
-	gameState := createGameState()
+	gameState := createGameState(gameConfig.CANVAS_SIZE)
 	canvas := createCanvas(gameConfig)
-	inputBuffer := make([]InputAction, 0)
+	inputBuffer := make([]InputAction, 0, 4) // arbitrary capacity of 4, players probably wont mash more than 4 keys between frames, if so the underlying array should adjust itself
 	return gameConfig, gameState, canvas, inputBuffer
 }
 

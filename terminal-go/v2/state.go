@@ -1,16 +1,25 @@
 package main
 
-import "github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+import (
+	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/random"
+	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+)
 
 type GameState struct {
 	snakeHeadPos   vector2.Type
 	snakeDirection vector2.Type
+	foodPos        vector2.Type
 }
 
-func createGameState() *GameState {
+func createGameState(canvasSize vector2.Type) *GameState {
+
+	foodX := random.Range(0, canvasSize.X)
+	foodY := random.Range(0, canvasSize.Y)
+
 	gameState := GameState{
 		snakeHeadPos:   vector2.New(0, 0),
 		snakeDirection: vector2.New(1, 0),
+		foodPos:        vector2.New(foodX, foodY),
 	}
 	return &gameState
 }
@@ -49,5 +58,6 @@ func (this *GameState) onUpdate(gameConfig GameConfig, inputBuffer []InputAction
 }
 
 func (this GameState) onDraw(gameConfig GameConfig, canvas GameCanvas) {
+	canvas.drawCharAtPos(this.foodPos, gameConfig.FOOD_CHAR, gameConfig)
 	canvas.drawCharAtPos(this.snakeHeadPos, gameConfig.SNAKE_CHAR, gameConfig)
 }

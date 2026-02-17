@@ -1,18 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 	"github.com/pkg/errors"
 )
-
-// TODO : LMAO SHOWS NOTHING
 
 func main() {
 	// logging setup
@@ -23,7 +21,7 @@ func main() {
 	defer logPanicAndCloseFile()
 
 	// tcell setup
-	s, _, err, finalizeScreen := InitTCellScreen()
+	s, err, finalizeScreen := InitTCellScreen()
 	if err != nil {
 		log.Panicf("%+v", err)
 	}
@@ -33,7 +31,6 @@ func main() {
 	gameConfig, gameState, canvas, inputBuffer := createGame(s)
 
 	for {
-
 		startTime := time.Now()
 
 		inputBuffer, isExit := DrainTCellEvents(s, inputBuffer)
@@ -53,13 +50,8 @@ func main() {
 }
 
 func InitLogFile(filename string) (err error, logPanicAndCloseFile func()) {
-	// truncate means delete contents on open, create if doesnt exist, write-only
-	const fileFlags = os.O_TRUNC | os.O_CREATE | os.O_WRONLY
-
-	// read = 4, write = 2, execute = 1; 6 = 4 + 2 (read write); 0 = octal; 666 = owner/group/others
-	const filePerm = 0666
-
-	file, err := os.OpenFile(filename, fileFlags, filePerm)
+	// create if doesnt exist, truncate (delete all contents) if already exists
+	file, err := os.Create(filename)
 	if err != nil {
 		return err, nil
 	}
@@ -75,18 +67,17 @@ func InitLogFile(filename string) (err error, logPanicAndCloseFile func()) {
 	return nil, logPanicAndCloseFile
 }
 
-func InitTCellScreen() (s tcell.Screen, defStyle tcell.Style, err error, finalizeScreen func()) {
-	defStyle = tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
-
+func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
 	s, err = tcell.NewScreen()
 	if err != nil {
-		return nil, defStyle, err, nil
+		return nil, err, nil
 	}
 	if err = s.Init(); err != nil {
-		return nil, defStyle, err, nil
+		return nil, err, nil
 	}
 
 	// Set default text style
+	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	s.SetStyle(defStyle)
 
 	// Clear screen
@@ -102,42 +93,46 @@ func InitTCellScreen() (s tcell.Screen, defStyle tcell.Style, err error, finaliz
 		}
 	}
 
-	return s, defStyle, nil, finalizeScreen
+	return s, nil, finalizeScreen
 }
 
 func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) ([]InputAction, bool) {
 	inputBuffer = inputBuffer[:0]
-
 	for {
 		// Update screen
 		s.Show()
 
-		// Poll event (can be used in select statement as well)
-		ev := <-s.EventQ()
+		select {
+		case ev := <-s.EventQ():
+			// Process event
+			switch ev := ev.(type) {
 
-		// Process event
-		switch ev := ev.(type) {
+			case *tcell.EventResize:
+				s.Sync()
 
-		case *tcell.EventResize:
-			s.Sync()
+			case *tcell.EventKey:
+				key, str := ev.Key(), ev.Str()
+				// log.Printf("key event: %v, %v", key, str)
 
-		case *tcell.EventKey:
-			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				return inputBuffer, true
-			}
+				if key == tcell.KeyEscape || key == tcell.KeyCtrlC {
+					return inputBuffer, true
+				}
 
-			switch key, str := ev.Key(), ev.Str(); {
-			case key == tcell.KeyUp, str == "w":
-				inputBuffer = append(inputBuffer, Up)
-			case key == tcell.KeyDown, str == "s":
-				inputBuffer = append(inputBuffer, Up)
-			case key == tcell.KeyLeft, str == "a":
-				inputBuffer = append(inputBuffer, Up)
-			case key == tcell.KeyRight, str == "d":
-				inputBuffer = append(inputBuffer, Up)
+				switch {
+				case key == tcell.KeyUp, str == "w":
+					inputBuffer = append(inputBuffer, Up)
+				case key == tcell.KeyDown, str == "s":
+					inputBuffer = append(inputBuffer, Down)
+				case key == tcell.KeyLeft, str == "a":
+					inputBuffer = append(inputBuffer, Left)
+				case key == tcell.KeyRight, str == "d":
+					inputBuffer = append(inputBuffer, Right)
+				}
+
 			}
 
 		default:
+			// no more events to process, terminate loop and return
 			return inputBuffer, false
 		}
 	}
@@ -160,8 +155,12 @@ func runGameLoop(gameConfig GameConfig, gameState *GameState, canvas GameCanvas,
 	gameState.onDraw(gameConfig, canvas)
 
 	// render
-	buffer := canvas.toStringBuffer()
-	s.PutStr(0, 0, buffer)
+	for y, row := range canvas {
+		for x, element := range row {
+			s.PutStr(x, y, element)
+		}
+	}
+	s.Show()
 
 	// TODO : rethink on whether should PutStr of ENTIRE CANVAS, or that we should actually abstract that out...
 	// cuz, tcell can simply replace one char at a time, so, that "might" be more efficient?
@@ -186,6 +185,10 @@ type Vector2 struct {
 
 func (this Vector2) Add(other Vector2) Vector2 {
 	return Vector2{x: this.x + other.x, y: this.y + other.y}
+}
+
+func (this Vector2) String() string {
+	return fmt.Sprintf("(%v, %v)", this.x, this.y)
 }
 
 type GameConfig struct {
@@ -256,6 +259,7 @@ func (this *GameState) onUpdate(gameConfig GameConfig, inputBuffer []InputAction
 	// TODO : for now just get the most recent input action
 	if len(inputBuffer) > 0 {
 		inputAction := inputBuffer[len(inputBuffer)-1]
+		// log.Println("action", inputAction)
 
 		switch {
 		case inputAction == Up:
@@ -359,20 +363,4 @@ func (this GameCanvas) drawChar(position Vector2, char string, config GameConfig
 	termY := config.PADDING.y + (config.CANVAS_SIZE.y - 1 - position.y)
 	termX := config.PADDING.x + position.x
 	this[termY][termX] = char
-}
-
-func (canvas GameCanvas) toStringBuffer() string {
-	var buffer strings.Builder
-
-	for _, row := range canvas {
-		for _, element := range row {
-			buffer.WriteString(element)
-		}
-		// Raw mode: terminal does not translate \n to \r\n
-		// so LF (\n) alone only moves down, not to column 0
-		// Use \r\n so each line starts at the left
-		buffer.WriteString("\r\n")
-	}
-
-	return buffer.String()
 }

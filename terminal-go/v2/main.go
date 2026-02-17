@@ -47,7 +47,7 @@ func main() {
 
 func createGame(s tcell.Screen) (GameConfig, *GameState, GameCanvas, []InputAction) {
 	gameConfig := createGameConfig(s.Size())
-	gameState := createGameState(gameConfig.CANVAS_SIZE)
+	gameState := CreateGameState(gameConfig.CANVAS_SIZE)
 	canvas := createCanvas(gameConfig)
 	inputBuffer := make([]InputAction, 0, 4) // arbitrary capacity of 4, players probably wont mash more than 4 keys between frames, if so the underlying array should adjust itself
 	return gameConfig, gameState, canvas, inputBuffer
@@ -55,11 +55,11 @@ func createGame(s tcell.Screen) (GameConfig, *GameState, GameCanvas, []InputActi
 
 func runGameLoop(gameConfig GameConfig, gameState *GameState, canvas GameCanvas, inputBuffer []InputAction, s tcell.Screen) {
 	// game logic
-	gameState.onUpdate(gameConfig, inputBuffer)
+	gameState.OnUpdate(gameConfig, inputBuffer)
 
 	// draw
 	canvas.resetCanvas(gameConfig)
-	gameState.onDraw(gameConfig, canvas)
+	gameState.OnDraw(gameConfig, canvas)
 
 	// render
 	for y, row := range canvas {

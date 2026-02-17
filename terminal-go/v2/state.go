@@ -1,14 +1,16 @@
 package main
 
+import "github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+
 type GameState struct {
-	snakeHeadPos   Vector2
-	snakeDirection Vector2
+	snakeHeadPos   vector2.Type
+	snakeDirection vector2.Type
 }
 
 func createGameState() *GameState {
 	gameState := GameState{
-		snakeHeadPos:   Vector2{0, 0},
-		snakeDirection: Vector2{1, 0},
+		snakeHeadPos:   vector2.New(0, 0),
+		snakeDirection: vector2.New(1, 0),
 	}
 	return &gameState
 }
@@ -21,14 +23,14 @@ func (this *GameState) onUpdate(gameConfig GameConfig, inputBuffer []InputAction
 		// log.Println("action", inputAction)
 
 		switch {
-		case inputAction == Up:
-			this.snakeDirection = Vector2{0, 1}
-		case inputAction == Down:
-			this.snakeDirection = Vector2{0, -1}
-		case inputAction == Left:
-			this.snakeDirection = Vector2{-1, 0}
-		case inputAction == Right:
-			this.snakeDirection = Vector2{1, 0}
+		case inputAction == Up && this.snakeDirection != vector2.Down:
+			this.snakeDirection = vector2.Up
+		case inputAction == Down && this.snakeDirection != vector2.Up:
+			this.snakeDirection = vector2.Down
+		case inputAction == Left && this.snakeDirection != vector2.Right:
+			this.snakeDirection = vector2.Left
+		case inputAction == Right && this.snakeDirection != vector2.Left:
+			this.snakeDirection = vector2.Right
 		}
 	}
 
@@ -36,16 +38,16 @@ func (this *GameState) onUpdate(gameConfig GameConfig, inputBuffer []InputAction
 	this.snakeHeadPos = this.snakeHeadPos.Add(this.snakeDirection)
 
 	// wrap around canvas edge
-	this.snakeHeadPos.x = this.snakeHeadPos.x % gameConfig.CANVAS_SIZE.x
-	this.snakeHeadPos.y = this.snakeHeadPos.y % gameConfig.CANVAS_SIZE.y
-	if this.snakeHeadPos.x < 0 {
-		this.snakeHeadPos.x += gameConfig.CANVAS_SIZE.x
+	this.snakeHeadPos.X = this.snakeHeadPos.X % gameConfig.CANVAS_SIZE.X
+	this.snakeHeadPos.Y = this.snakeHeadPos.Y % gameConfig.CANVAS_SIZE.Y
+	if this.snakeHeadPos.X < 0 {
+		this.snakeHeadPos.X += gameConfig.CANVAS_SIZE.X
 	}
-	if this.snakeHeadPos.y < 0 {
-		this.snakeHeadPos.y += gameConfig.CANVAS_SIZE.y
+	if this.snakeHeadPos.Y < 0 {
+		this.snakeHeadPos.Y += gameConfig.CANVAS_SIZE.Y
 	}
 }
 
 func (this GameState) onDraw(gameConfig GameConfig, canvas GameCanvas) {
-	canvas.drawChar(this.snakeHeadPos, gameConfig.SNAKE_CHAR, gameConfig)
+	canvas.drawCharAtPos(this.snakeHeadPos, gameConfig.SNAKE_CHAR, gameConfig)
 }

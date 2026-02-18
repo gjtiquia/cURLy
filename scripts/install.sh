@@ -4,6 +4,9 @@
 
 set -e
 
+echo "Installing cURLy! The snake game with cURL"
+echo ""
+
 REPO="gjtiquia/cURLy"
 GITHUB_API="https://api.github.com/repos/$REPO"
 
@@ -50,6 +53,7 @@ ASSET_NAME="cURLy_${OS}_${ARCH}"
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/${VERSION}/${ASSET_NAME}"
 
 # Download the file
+echo ""
 echo "Downloading $ASSET_NAME from $DOWNLOAD_URL..."
 if ! curl -fsSLO "$DOWNLOAD_URL"; then
     printf "${RED}Error: Failed to download! Platform $PLATFORM unsupported!${NC}\n"
@@ -57,23 +61,22 @@ if ! curl -fsSLO "$DOWNLOAD_URL"; then
 fi
 echo "Download successful!"
 
+# Rename downloaded file
+EXEC_NAME="cURLy"
+[ "$OS" = "windows" ] && EXEC_NAME="${EXEC_NAME}.exe"
+mv "$ASSET_NAME" "$EXEC_NAME"
+
 # Make executable (if not on Windows)
 if [ "$OS" != "windows" ]; then
-    if [ -f "${ASSET_NAME}" ]; then
-        chmod +x $ASSET_NAME
-        EXEC_NAME=$ASSET_NAME
-    else
-        printf "${RED}Error: Executable not found after extraction${NC}\n"
-        ls -la
-        exit 1
-    fi
-else
-    EXEC_NAME=$ASSET_NAME
+    chmod +x "$EXEC_NAME"
 fi
 
 # cannot run directly cuz when piping to bash it does not have any terminal info, ie. size=0x0
 # echo "running $EXEC_NAME"
 # ./$EXEC_NAME
 
+echo ""
 echo "Run the following command to play cURLy!"
-echo "./$ASSET_NAME"
+echo ""
+printf "${GREEN}./$EXEC_NAME${NC}\n"
+echo ""

@@ -15,6 +15,13 @@ func main() {
 
 	fmt.Println("building... dir:", BUILD_DIR)
 
+	rmCmd := exec.Command("rm", "-rf", "bin")
+	err := rmCmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "rm -rf bin: %v\n", err)
+		os.Exit(1)
+	}
+
 	listCmd := exec.Command("go", "tool", "dist", "list")
 	bytes, err := listCmd.Output()
 	if err != nil {
@@ -46,7 +53,7 @@ func main() {
 
 		if out, err := buildCmd.CombinedOutput(); err != nil {
 			fmt.Fprintf(os.Stderr, "build %s/%s failed: %v\n%s", targetOs, targetArch, err, out)
-			os.Exit(1)
+			continue
 		}
 	}
 }

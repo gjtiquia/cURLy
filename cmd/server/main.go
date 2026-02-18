@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -21,5 +22,22 @@ func main() {
 }
 
 func homePageHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hello world")
+	bytes, err := os.ReadFile("./markdown/USAGE.md")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if isCurl(r) {
+		fmt.Fprintf(w, "%s", string(bytes))
+	} else {
+		// TODO : proper html and styling
+		fmt.Fprintf(w, "%s", string(bytes))
+	}
+}
+
+func isCurl(r *http.Request) bool {
+	userAgent := strings.ToLower(r.UserAgent())
+	isCurl := strings.Contains(userAgent, "curl")
+	return isCurl
 }

@@ -26,6 +26,8 @@ type GameState struct {
 
 	foodPos vector2.Type
 	score   int
+
+	remainingInputBuffer []InputAction
 }
 
 func CreateGameState(canvasSize vector2.Type) *GameState {
@@ -54,6 +56,8 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 
 		foodPos: vector2.Zero,
 		score:   0,
+
+		remainingInputBuffer: make([]InputAction, 0, 4),
 	}
 
 	// depends on the existing snake head pos
@@ -82,25 +86,34 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 		return
 	}
 
-	// update snake direction
-	if len(inputBuffer) > 0 {
-		// TODO : for now just get the most recent input action
-		inputAction := inputBuffer[len(inputBuffer)-1]
-		// log.Println("action", inputAction)
+	// update snake direction from input
+	inputAction := None
 
-		switch {
-		case inputAction == Up && this.snakeDirection != vector2.Down:
-			this.snakeDirection = vector2.Up
+	switch {
+	case len(inputBuffer) > 0:
+		inputAction = inputBuffer[0]
 
-		case inputAction == Down && this.snakeDirection != vector2.Up:
-			this.snakeDirection = vector2.Down
+		// resets remaining input buffer and add the rest of input buffer into remaining input buffer
+		this.remainingInputBuffer = append(this.remainingInputBuffer[:0], inputBuffer[1:]...)
 
-		case inputAction == Left && this.snakeDirection != vector2.Right:
-			this.snakeDirection = vector2.Left
+	case len(this.remainingInputBuffer) > 0:
+		inputAction = this.remainingInputBuffer[0]
 
-		case inputAction == Right && this.snakeDirection != vector2.Left:
-			this.snakeDirection = vector2.Right
-		}
+		this.remainingInputBuffer = this.remainingInputBuffer[1:] // [1:] is safe in Go even if length is 0
+	}
+
+	switch {
+	case inputAction == Up && this.snakeDirection != vector2.Down:
+		this.snakeDirection = vector2.Up
+
+	case inputAction == Down && this.snakeDirection != vector2.Up:
+		this.snakeDirection = vector2.Down
+
+	case inputAction == Left && this.snakeDirection != vector2.Right:
+		this.snakeDirection = vector2.Left
+
+	case inputAction == Right && this.snakeDirection != vector2.Left:
+		this.snakeDirection = vector2.Right
 	}
 
 	previousSnakeHeadPos := this.snakeHeadPos

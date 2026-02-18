@@ -59,13 +59,13 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) (buffer []Input
 				}
 
 				switch {
-				case key == tcell.KeyUp, str == "w":
+				case key == tcell.KeyUp, str == "w", str == "k":
 					inputBuffer = append(inputBuffer, Up)
-				case key == tcell.KeyDown, str == "s":
+				case key == tcell.KeyDown, str == "s", str == "j":
 					inputBuffer = append(inputBuffer, Down)
-				case key == tcell.KeyLeft, str == "a":
+				case key == tcell.KeyLeft, str == "a", str == "h":
 					inputBuffer = append(inputBuffer, Left)
-				case key == tcell.KeyRight, str == "d":
+				case key == tcell.KeyRight, str == "d", str == "l":
 					inputBuffer = append(inputBuffer, Right)
 				case str == "r":
 					inputBuffer = append(inputBuffer, Restart)

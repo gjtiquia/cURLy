@@ -50,8 +50,8 @@ func createGame(s tcell.Screen) (GameConfig, *GameState, GameCanvas, []InputActi
 	gameState := CreateGameState(gameConfig.CANVAS_SIZE)
 
 	canvas := createCanvas(gameConfig)
-	canvas.drawTitle("cURLy", gameConfig)
-	canvas.drawFooter("Move: WASD; Restart: R", gameConfig)
+	canvas.drawTitle(gameConfig.TITLE, gameConfig)
+	canvas.drawFooter(gameConfig.FOOTER, gameConfig)
 
 	// arbitrary capacity of 4, players probably wont mash more than 4 keys between frames, if so the underlying array should adjust itself
 	inputBuffer := make([]InputAction, 0, 4)

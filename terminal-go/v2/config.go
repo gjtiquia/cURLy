@@ -17,6 +17,9 @@ type GameConfig struct {
 	CANVAS_SIZE      vector2.Type
 	PADDING          vector2.Type
 
+	TITLE  string
+	FOOTER string
+
 	PADDING_CHAR    string
 	BORDER_X_CHAR   string
 	BORDER_Y_CHAR   string
@@ -49,6 +52,9 @@ func createGameConfig(termWidth, termHeight int) GameConfig {
 		BORDER_THICKNESS: BORDER_THICKNESS,
 		TERM_SIZE:        vector2.New(termWidth, termHeight),
 		PADDING:          vector2.New(paddingX, paddingY),
+
+		TITLE:  "cURLy.gjt.io",
+		FOOTER: "Move: WASD; Restart: R",
 
 		PADDING_CHAR:    " ",
 		BORDER_X_CHAR:   "-",

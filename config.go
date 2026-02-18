@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+	"github.com/gjtiquia/cURLy/internals/vector2"
 )
 
 type GameConfig struct {

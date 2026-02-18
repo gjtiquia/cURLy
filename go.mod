@@ -1,4 +1,4 @@
-module github.com/gjtiquia/cURLy/terminal-go/v2
+module github.com/gjtiquia/cURLy
 
 go 1.24.4
 

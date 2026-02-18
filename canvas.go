@@ -1,6 +1,6 @@
 package main
 
-import "github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+import "github.com/gjtiquia/cURLy/internals/vector2"
 
 type GameCanvas [][]string
 

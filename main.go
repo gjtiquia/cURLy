@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v3"
-	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/logfile"
+	"github.com/gjtiquia/cURLy/internals/logfile"
 	"github.com/pkg/errors"
 )
 

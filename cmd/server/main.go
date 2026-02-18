@@ -10,6 +10,7 @@ import (
 
 func main() {
 	http.HandleFunc("/", homePageHandler)
+	http.HandleFunc("/install.sh", installPageHandler)
 
 	port, ok := os.LookupEnv("PORT")
 	if !ok {
@@ -34,6 +35,15 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 		// TODO : proper html and styling
 		fmt.Fprintf(w, "%s", string(bytes))
 	}
+}
+
+func installPageHandler(w http.ResponseWriter, r *http.Request) {
+	bytes, err := os.ReadFile("./scripts/install.sh")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "%s", string(bytes))
 }
 
 func isCurl(r *http.Request) bool {

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # references https://github.com/anomalyco/opentui/blob/59c8a83680a4357570b108ccfa6b472353968a15/packages/core/src/examples/install.sh
 

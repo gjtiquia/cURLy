@@ -17,12 +17,13 @@ type GameConfig struct {
 	CANVAS_SIZE      vector2.Type
 	PADDING          vector2.Type
 
-	PADDING_CHAR  string
-	BORDER_X_CHAR string
-	BORDER_Y_CHAR string
-	BG_CHAR       string
-	SNAKE_CHAR    string
-	FOOD_CHAR     string
+	PADDING_CHAR    string
+	BORDER_X_CHAR   string
+	BORDER_Y_CHAR   string
+	BG_CHAR         string
+	SNAKE_HEAD_CHAR string
+	SNAKE_BODY_CHAR string
+	FOOD_CHAR       string
 }
 
 func createGameConfig(termWidth, termHeight int) GameConfig {
@@ -49,11 +50,12 @@ func createGameConfig(termWidth, termHeight int) GameConfig {
 		TERM_SIZE:        vector2.New(termWidth, termHeight),
 		PADDING:          vector2.New(paddingX, paddingY),
 
-		PADDING_CHAR:  " ",
-		BORDER_X_CHAR: "-",
-		BORDER_Y_CHAR: "|",
-		BG_CHAR:       " ",
-		SNAKE_CHAR:    "O",
-		FOOD_CHAR:     "*",
+		PADDING_CHAR:    " ",
+		BORDER_X_CHAR:   "-",
+		BORDER_Y_CHAR:   "|",
+		BG_CHAR:         " ",
+		SNAKE_HEAD_CHAR: "O",
+		SNAKE_BODY_CHAR: "o",
+		FOOD_CHAR:       "*",
 	}
 }

@@ -34,7 +34,7 @@ func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
 	return s, nil, finalizeScreen
 }
 
-func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) ([]InputAction, bool) {
+func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) (buffer []InputAction, isExit bool) {
 	inputBuffer = inputBuffer[:0]
 	for {
 		// Update screen
@@ -53,6 +53,8 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) ([]InputAction,
 				// log.Printf("key event: %v, %v", key, str)
 
 				if key == tcell.KeyEscape || key == tcell.KeyCtrlC {
+					inputBuffer = inputBuffer[:0]
+					inputBuffer = append(inputBuffer, Exit)
 					return inputBuffer, true
 				}
 
@@ -65,8 +67,9 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) ([]InputAction,
 					inputBuffer = append(inputBuffer, Left)
 				case key == tcell.KeyRight, str == "d":
 					inputBuffer = append(inputBuffer, Right)
+				case str == "r":
+					inputBuffer = append(inputBuffer, Restart)
 				}
-
 			}
 
 		default:

@@ -1,11 +1,21 @@
 package main
 
 import (
+	"slices"
+
 	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/random"
 	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
 )
 
+type PlayState int
+
+const (
+	GamePlaying PlayState = iota
+	GameLost
+)
+
 type GameState struct {
+	playState        PlayState
 	snakeHeadPos     vector2.Type
 	snakeBodyPosList []vector2.Type
 	snakeDirection   vector2.Type
@@ -30,6 +40,7 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 	}
 
 	gameState := GameState{
+		playState:      GamePlaying,
 		snakeHeadPos:   snakeHeadPos,
 		snakeDirection: snakeDirection,
 	}
@@ -41,6 +52,17 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 }
 
 func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction) {
+
+	if slices.Contains(inputBuffer, Restart) {
+		// TODO :
+		// this = CreateGameState(gameConfig.CANVAS_SIZE)
+		// return
+	}
+
+	if this.playState != GamePlaying {
+		return
+	}
+
 	// update snake direction
 	if len(inputBuffer) > 0 {
 		// TODO : for now just get the most recent input action
@@ -62,9 +84,18 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 		}
 	}
 
-	// update snake head pos
 	previousSnakeHeadPos := this.snakeHeadPos
-	this.snakeHeadPos = this.snakeHeadPos.Add(this.snakeDirection)
+	nextSnakeHeadPos := this.snakeHeadPos.Add(this.snakeDirection)
+
+	if this.isOverlappingBody(nextSnakeHeadPos) {
+		// TODO : polish with a message
+
+		this.playState = GameLost
+		return
+	}
+
+	// update snake head pos
+	this.snakeHeadPos = nextSnakeHeadPos
 
 	// wrap around canvas edge
 	this.snakeHeadPos.X = this.snakeHeadPos.X % gameConfig.CANVAS_SIZE.X
@@ -126,11 +157,18 @@ func (this *GameState) isFoodPosValid(pos vector2.Type) bool {
 		return false
 	}
 
-	for _, bodyPos := range this.snakeBodyPosList {
-		if pos == bodyPos {
-			return false
-		}
+	if this.isOverlappingBody(pos) {
+		return false
 	}
 
 	return true
+}
+
+func (this *GameState) isOverlappingBody(pos vector2.Type) bool {
+	for _, bodyPos := range this.snakeBodyPosList {
+		if pos == bodyPos {
+			return true
+		}
+	}
+	return false
 }

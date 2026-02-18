@@ -8,5 +8,6 @@ const (
 	Down
 	Left
 	Right
+	Restart
 	Exit
 )

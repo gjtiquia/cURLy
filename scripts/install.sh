@@ -46,7 +46,31 @@ printf "${BLUE}Version: $VERSION_NO_V${NC}\n"
 
 # Construct download URL
 ASSET_NAME="cURLy_${OS}_${ARCH}"
+[ "$OS" = "windows" ] && ASSET_NAME="${ASSET_NAME}.exe"
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/${VERSION}/${ASSET_NAME}"
 
-echo "Download URL: $DOWNLOAD_URL"
-echo ""
+# Download the file
+echo "Downloading $ASSET_NAME from $DOWNLOAD_URL..."
+if ! curl -LO "$DOWNLOAD_URL"; then
+    printf "${RED}Error: Failed to download! Platform $PLATFORM unsupported!${NC}\n"
+    echo "URL attempted: $DOWNLOAD_URL"
+    exit 1
+fi
+
+# Make executable (if not on Windows)
+if [ "$OS" != "windows" ]; then
+    if [ -f "${ASSET_NAME}" ]; then
+        chmod +x $ASSET_NAME
+        EXEC_NAME=$ASSET_NAME
+    else
+        printf "${RED}Error: Executable not found after extraction${NC}\n"
+        ls -la
+        exit 1
+    fi
+else
+    EXEC_NAME=$ASSET_NAME
+fi
+
+echo "running $EXEC_NAME"
+
+./$EXEC_NAME

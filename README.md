@@ -20,6 +20,12 @@ curl -fsSL cURLy.gjt.io/install.sh | bash
 # run cURLy tui
 go run ./cmd/tui
 
-# run web server
-PORT=3000 go run ./cmd/server/
+# run web server (port 3000 by default)
+go run ./cmd/server
+
+# run web server on specific port
+PORT=4321 go run ./cmd/server
+
+# run web server on port 3000 with live reload
+air
 ```

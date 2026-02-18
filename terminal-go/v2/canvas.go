@@ -111,3 +111,16 @@ func (this GameCanvas) drawMessage(message string, config GameConfig) {
 		this[y][x+i] = string(char)
 	}
 }
+
+func (this GameCanvas) drawFooter(message string, config GameConfig) {
+	x := config.PADDING.X
+	y := config.PADDING.Y + config.CANVAS_SIZE.Y + config.BORDER_THICKNESS.Y + 1
+
+	for i, char := range message {
+		if x+i >= config.TERM_SIZE.X {
+			break
+		}
+
+		this[y][x+i] = string(char)
+	}
+}

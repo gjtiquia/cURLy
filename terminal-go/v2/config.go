@@ -30,7 +30,7 @@ func createGameConfig(termWidth, termHeight int) GameConfig {
 	const FPS = 10
 	const DELTA_TIME_MS = 1000 / FPS
 
-	CANVAS_SIZE := vector2.New(40, 10)
+	CANVAS_SIZE := vector2.New(24, 8)
 	BORDER_THICKNESS := vector2.New(1, 1)
 
 	// TODO : should make effort to support resize...? right now assumes static

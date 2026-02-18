@@ -158,7 +158,7 @@ func (this *GameState) OnDraw(gameConfig GameConfig, canvas GameCanvas) {
 	case GamePlaying:
 		canvas.drawMessage(fmt.Sprintf("Score: %v", this.score), gameConfig)
 	case GameLost:
-		canvas.drawMessage(fmt.Sprintf("You Lost! Score: %v. Press R to restart", this.score), gameConfig)
+		canvas.drawMessage(fmt.Sprintf("You Lost! Score: %v", this.score), gameConfig)
 	default:
 		canvas.drawMessage("", gameConfig)
 	}

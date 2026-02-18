@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/random"
@@ -15,11 +16,14 @@ const (
 )
 
 type GameState struct {
-	playState        PlayState
+	playState PlayState
+
 	snakeHeadPos     vector2.Type
 	snakeBodyPosList []vector2.Type
 	snakeDirection   vector2.Type
-	foodPos          vector2.Type
+
+	foodPos vector2.Type
+	score   int
 }
 
 func CreateGameState(canvasSize vector2.Type) *GameState {
@@ -40,9 +44,14 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 	}
 
 	gameState := GameState{
-		playState:      GamePlaying,
-		snakeHeadPos:   snakeHeadPos,
-		snakeDirection: snakeDirection,
+		playState: GamePlaying,
+
+		snakeHeadPos:     snakeHeadPos,
+		snakeDirection:   snakeDirection,
+		snakeBodyPosList: make([]vector2.Type, 0, canvasSize.X*canvasSize.Y),
+
+		foodPos: vector2.Zero,
+		score:   0,
 	}
 
 	// depends on the existing snake head pos
@@ -118,6 +127,8 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 
 		// add an arbitrary body pos, it will set a new pos anyways when moving body parts forward
 		this.snakeBodyPosList = append(this.snakeBodyPosList, vector2.Zero)
+
+		this.score += 10 // add 10 seems happier than add 1 lol
 	}
 
 	// move each body part forward (move the last one first!)
@@ -142,6 +153,16 @@ func (this *GameState) OnDraw(gameConfig GameConfig, canvas GameCanvas) {
 	}
 
 	canvas.drawCharAtPos(this.snakeHeadPos, gameConfig.SNAKE_HEAD_CHAR, gameConfig)
+
+	switch this.playState {
+	case GamePlaying:
+		canvas.drawMessage(fmt.Sprintf("Score: %v", this.score), gameConfig)
+	case GameLost:
+		canvas.drawMessage(fmt.Sprintf("You Lost! Score: %v. Press R to restart", this.score), gameConfig)
+	default:
+		canvas.drawMessage("", gameConfig)
+	}
+
 }
 
 func (this *GameState) generateRandomFoodPos(canvasSize vector2.Type) vector2.Type {

@@ -65,6 +65,12 @@ func (this GameCanvas) resetCanvas(config GameConfig) {
 			this.drawChar(x, y, config.BG_CHAR, config)
 		}
 	}
+
+	// clear message
+	y := config.PADDING.Y + config.CANVAS_SIZE.Y + config.BORDER_THICKNESS.Y
+	for x := config.PADDING.X; x < config.TERM_SIZE.X; x++ {
+		this[y][x] = " "
+	}
 }
 
 func (this GameCanvas) drawCharAtPos(pos vector2.Type, char string, config GameConfig) {
@@ -78,4 +84,30 @@ func (this GameCanvas) drawChar(x, y int, char string, config GameConfig) {
 	termY := config.PADDING.Y + (config.CANVAS_SIZE.Y - 1 - y)
 	termX := config.PADDING.X + x
 	this[termY][termX] = char
+}
+
+func (this GameCanvas) drawTitle(title string, config GameConfig) {
+	x := config.PADDING.X
+	y := config.PADDING.Y - config.BORDER_THICKNESS.Y - 1
+
+	for i, char := range title {
+		if x+i > config.TERM_SIZE.X {
+			break
+		}
+
+		this[y][x+i] = string(char)
+	}
+}
+
+func (this GameCanvas) drawMessage(message string, config GameConfig) {
+	x := config.PADDING.X
+	y := config.PADDING.Y + config.CANVAS_SIZE.Y + config.BORDER_THICKNESS.Y
+
+	for i, char := range message {
+		if x+i >= config.TERM_SIZE.X {
+			break
+		}
+
+		this[y][x+i] = string(char)
+	}
 }

@@ -28,4 +28,7 @@ PORT=4321 go run ./cmd/server
 
 # run web server on port 3000 with live reload
 air
+
+# build web server
+go build -o ./bin/server ./cmd/server
 ```

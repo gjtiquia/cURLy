@@ -54,7 +54,7 @@ func createGameConfig(termWidth, termHeight int) GameConfig {
 		BORDER_X_CHAR:   "-",
 		BORDER_Y_CHAR:   "|",
 		BG_CHAR:         " ",
-		SNAKE_HEAD_CHAR: "O",
+		SNAKE_HEAD_CHAR: "0",
 		SNAKE_BODY_CHAR: "o",
 		FOOD_CHAR:       "*",
 	}

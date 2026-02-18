@@ -51,9 +51,8 @@ DOWNLOAD_URL="https://github.com/$REPO/releases/download/${VERSION}/${ASSET_NAME
 
 # Download the file
 echo "Downloading $ASSET_NAME from $DOWNLOAD_URL..."
-if ! curl -LO "$DOWNLOAD_URL"; then
+if ! curl -fsSLO "$DOWNLOAD_URL"; then
     printf "${RED}Error: Failed to download! Platform $PLATFORM unsupported!${NC}\n"
-    echo "URL attempted: $DOWNLOAD_URL"
     exit 1
 fi
 

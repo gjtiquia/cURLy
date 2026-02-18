@@ -55,6 +55,7 @@ if ! curl -fsSLO "$DOWNLOAD_URL"; then
     printf "${RED}Error: Failed to download! Platform $PLATFORM unsupported!${NC}\n"
     exit 1
 fi
+echo "Download successful!"
 
 # Make executable (if not on Windows)
 if [ "$OS" != "windows" ]; then
@@ -70,6 +71,9 @@ else
     EXEC_NAME=$ASSET_NAME
 fi
 
-echo "running $EXEC_NAME"
+# cannot run directly cuz when piping to bash it does not have any terminal info, ie. size=0x0
+# echo "running $EXEC_NAME"
+# ./$EXEC_NAME
 
-./$EXEC_NAME
+echo "Run the following command to play cURLy!"
+echo "./$ASSET_NAME"

@@ -13,7 +13,6 @@ const BUILD_DIR = "./bin"
 const BUILD_FILE = "cURLy"
 
 func main() {
-
 	fmt.Println("building... dir:", BUILD_DIR)
 
 	rmCmd := exec.Command("rm", "-rf", "bin")
@@ -52,7 +51,6 @@ func main() {
 }
 
 func build(targetOs, targetArch string, wg *sync.WaitGroup) {
-
 	defer wg.Done()
 
 	fileName := fmt.Sprintf("%s/%s_%s_%s", BUILD_DIR, BUILD_FILE, targetOs, targetArch)

@@ -54,9 +54,13 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction) {
 
 	if slices.Contains(inputBuffer, Restart) {
-		// TODO :
-		// this = CreateGameState(gameConfig.CANVAS_SIZE)
-		// return
+		// Overwrite the struct at our pointer so the caller sees the new state; assigning to `this` would only change our local copy.
+		// `this` is a pointer to gameState
+		// `this = CreateGameState()` simply changes the local pointer to point to a new struct, but the pointer of the caller still points to the existing struct, so no visual change
+		// `*this` dereferences the pointer, so we have access to the struct
+		// `*this = *CreateGameState` means we override the struct fields in the original struct, keeping the same pointer address
+		*this = *CreateGameState(gameConfig.CANVAS_SIZE)
+		return
 	}
 
 	if this.playState != GamePlaying {

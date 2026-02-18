@@ -6,6 +6,7 @@ import (
 
 	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/random"
 	"github.com/gjtiquia/cURLy/terminal-go/v2/internals/vector2"
+	"github.com/pkg/errors"
 )
 
 type PlayState int
@@ -13,6 +14,7 @@ type PlayState int
 const (
 	GamePlaying PlayState = iota
 	GameLost
+	GameWon
 )
 
 type GameState struct {
@@ -55,8 +57,12 @@ func CreateGameState(canvasSize vector2.Type) *GameState {
 	}
 
 	// depends on the existing snake head pos
-	gameState.foodPos = gameState.generateRandomFoodPos(canvasSize)
+	foodPos, err := gameState.generateRandomFoodPos(canvasSize)
+	if err != nil {
+		panic(err) // should not happen because canvas is empty
+	}
 
+	gameState.foodPos = foodPos
 	return &gameState
 }
 
@@ -101,8 +107,6 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 	nextSnakeHeadPos := this.snakeHeadPos.Add(this.snakeDirection)
 
 	if this.isOverlappingBody(nextSnakeHeadPos) {
-		// TODO : polish with a message
-
 		this.playState = GameLost
 		return
 	}
@@ -120,19 +124,10 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 		this.snakeHeadPos.Y += gameConfig.CANVAS_SIZE.Y
 	}
 
-	// ate food handling and spawn new food handling
-	ateFood := this.snakeHeadPos == this.foodPos
-	if ateFood {
-		this.foodPos = this.generateRandomFoodPos(gameConfig.CANVAS_SIZE)
-
-		// add an arbitrary body pos, it will set a new pos anyways when moving body parts forward
-		this.snakeBodyPosList = append(this.snakeBodyPosList, vector2.Zero)
-
-		this.score += 10 // add 10 seems happier than add 1 lol
-	}
-
 	// move each body part forward (move the last one first!)
+	previousLastBodyPos := this.snakeHeadPos // fallback
 	if len(this.snakeBodyPosList) > 0 {
+		previousLastBodyPos = this.snakeBodyPosList[len(this.snakeBodyPosList)-1]
 		for i := len(this.snakeBodyPosList) - 1; i >= 0; i-- {
 			if i == 0 {
 				this.snakeBodyPosList[i] = previousSnakeHeadPos
@@ -141,6 +136,27 @@ func (this *GameState) OnUpdate(gameConfig GameConfig, inputBuffer []InputAction
 			}
 		}
 	}
+
+	// ate food handling and spawn new food handling
+	ateFood := this.snakeHeadPos == this.foodPos
+	if ateFood {
+		this.score += 10 // add 10 seems happier than add 1 lol
+		this.snakeBodyPosList = append(this.snakeBodyPosList, previousLastBodyPos)
+
+		// order matters! generate food AFTER new body positions are updated
+		foodPos, err := this.generateRandomFoodPos(gameConfig.CANVAS_SIZE)
+		if err == nil { // will be nil if canvas is full
+			this.foodPos = foodPos
+		}
+	}
+
+	if this.checkWin(gameConfig.CANVAS_SIZE) {
+		this.playState = GameWon
+	}
+}
+
+func (this *GameState) checkWin(canvasSize vector2.Type) bool {
+	return 1+len(this.snakeBodyPosList) == canvasSize.X*canvasSize.Y
 }
 
 func (this *GameState) OnDraw(gameConfig GameConfig, canvas GameCanvas) {
@@ -159,13 +175,19 @@ func (this *GameState) OnDraw(gameConfig GameConfig, canvas GameCanvas) {
 		canvas.drawMessage(fmt.Sprintf("Score: %v", this.score), gameConfig)
 	case GameLost:
 		canvas.drawMessage(fmt.Sprintf("You Lost! Score: %v", this.score), gameConfig)
+	case GameWon:
+		canvas.drawMessage(fmt.Sprintf("You Won! Score: %v", this.score), gameConfig)
 	default:
 		canvas.drawMessage("", gameConfig)
 	}
 
 }
 
-func (this *GameState) generateRandomFoodPos(canvasSize vector2.Type) vector2.Type {
+func (this *GameState) generateRandomFoodPos(canvasSize vector2.Type) (vector2.Type, error) {
+	if this.checkWin(canvasSize) {
+		return vector2.Zero, errors.New("no space to generate food pos")
+	}
+
 	randomFoodPos := vector2.Random(canvasSize)
 	isPositionValid := this.isFoodPosValid(randomFoodPos)
 
@@ -174,7 +196,7 @@ func (this *GameState) generateRandomFoodPos(canvasSize vector2.Type) vector2.Ty
 		isPositionValid = this.isFoodPosValid(randomFoodPos)
 	}
 
-	return randomFoodPos
+	return randomFoodPos, nil
 }
 
 func (this *GameState) isFoodPosValid(pos vector2.Type) bool {

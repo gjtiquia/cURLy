@@ -87,7 +87,7 @@ func (this GameCanvas) drawChar(x, y int, char string, config GameConfig) {
 }
 
 func (this GameCanvas) drawTitle(title string, config GameConfig) {
-	x := config.PADDING.X
+	x := config.PADDING.X - config.BORDER_THICKNESS.X
 	y := config.PADDING.Y - config.BORDER_THICKNESS.Y - 1
 
 	for i, char := range title {
@@ -100,7 +100,7 @@ func (this GameCanvas) drawTitle(title string, config GameConfig) {
 }
 
 func (this GameCanvas) drawMessage(message string, config GameConfig) {
-	x := config.PADDING.X
+	x := config.PADDING.X - config.BORDER_THICKNESS.X
 	y := config.PADDING.Y + config.CANVAS_SIZE.Y + config.BORDER_THICKNESS.Y
 
 	for i, char := range message {
@@ -113,7 +113,7 @@ func (this GameCanvas) drawMessage(message string, config GameConfig) {
 }
 
 func (this GameCanvas) drawFooter(message string, config GameConfig) {
-	x := config.PADDING.X
+	x := config.PADDING.X - config.BORDER_THICKNESS.X
 	y := config.PADDING.Y + config.CANVAS_SIZE.Y + config.BORDER_THICKNESS.Y + 1
 
 	for i, char := range message {

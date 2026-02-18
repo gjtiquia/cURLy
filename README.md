@@ -1,6 +1,6 @@
 # cURLy
 
-## commands
+## tasks
 
 ```bash
 

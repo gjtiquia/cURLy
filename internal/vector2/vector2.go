@@ -3,7 +3,7 @@ package vector2
 import (
 	"fmt"
 
-	"github.com/gjtiquia/cURLy/internals/random"
+	"github.com/gjtiquia/cURLy/internal/random"
 )
 
 type vector2 struct {

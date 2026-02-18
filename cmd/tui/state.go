@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/gjtiquia/cURLy/internals/random"
-	"github.com/gjtiquia/cURLy/internals/vector2"
+	"github.com/gjtiquia/cURLy/internal/random"
+	"github.com/gjtiquia/cURLy/internal/vector2"
 	"github.com/pkg/errors"
 )
 

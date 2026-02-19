@@ -6,39 +6,8 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- <script src="/public/packages/htmx/htmx.min.js"></script> -->
     <!-- <script src="/public/packages/htmx/htmx-ext-ws.min.js"></script> -->
+    <script defer src="/public/wasm_exec.js"></script>
     <script type="module" src="/public/index.js?={{.}}"></script>
-    <script src="/public/wasm_exec.js"></script>
-    <script>
-        const go = new Go();
-
-        // Providing the environment object, used in WebAssembly.instantiateStreaming.
-        // This part goes after "const go = new Go();" declaration.
-        go.importObject.env = {
-            'add': function (x, y) {
-                return x + y
-            }
-            // ... other functions
-        }
-
-        // polyfill if browsers do not support WebAssembly.instantiateStreaming
-        if (!WebAssembly.instantiateStreaming) {
-            WebAssembly.instantiateStreaming = async (resp, importObject) => {
-                const source = await (await resp).arrayBuffer();
-                return await WebAssembly.instantiate(source, importObject);
-            };
-        }
-
-        // fetch wasm
-        WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
-            wasm = result.instance
-            go.run(wasm); // this also calls main()
-
-            // Calling the multiply function:
-            console.log('multiplied two numbers:', wasm.exports.multiply(5, 3));
-        }).catch((err) => {
-            console.error(err);
-        });
-    </script>
     <link href="/public/styles.css?v={{.}}" rel="stylesheet" />
     <title>
         cURLy

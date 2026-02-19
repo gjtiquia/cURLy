@@ -4,8 +4,7 @@ function sleepAsync(ms) {
 }
 
 // web/src/copy-button.ts
-listenToCopyButton();
-function listenToCopyButton() {
+function init() {
   document.body.addEventListener("click", async (event) => {
     const button = event.target;
     if (!button.matches("[data-copy-button]"))
@@ -26,6 +25,28 @@ function listenToCopyButton() {
     }
   });
 }
-export {
-  listenToCopyButton
-};
+init();
+// web/src/wasm.ts
+function init2() {
+  console.log("wasm.init");
+  const go = new Go;
+  go.importObject.env = {
+    add: function(x, y) {
+      return x + y;
+    }
+  };
+  if (!WebAssembly.instantiateStreaming) {
+    WebAssembly.instantiateStreaming = async (resp, importObject) => {
+      const source = await (await resp).arrayBuffer();
+      return await WebAssembly.instantiate(source, importObject);
+    };
+  }
+  WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
+    const wasm = result.instance;
+    go.run(wasm);
+    console.log("multiplied two numbers:", wasm.exports.multiply(5, 3));
+  }).catch((err) => {
+    console.error(err);
+  });
+}
+init2();

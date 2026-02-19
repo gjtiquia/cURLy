@@ -1,7 +1,6 @@
 import { sleepAsync } from "./util";
 
-listenToCopyButton()
-export function listenToCopyButton() {
+export function init() {
     // subscribe to the submit event itself, instead of having each element subscribe to the submit event
     // this is because, hx-boost does not do full page reloads, so <script> tags will not be reloaded, and it wont subscribe to new elements
     document.body.addEventListener("click", async (event) => {
@@ -29,3 +28,5 @@ export function listenToCopyButton() {
         }
     });
 }
+
+init()

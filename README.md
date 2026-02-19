@@ -37,6 +37,9 @@ air
 # build tailwind classes
 bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
 
+# bundle TypeScript scripts
+bun build ./web/src/index.ts --outdir=./public
+
 # build web server
 go build -o ./bin/server ./cmd/server
 

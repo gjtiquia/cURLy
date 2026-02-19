@@ -29,13 +29,14 @@ init();
 
 // web/src/wasm.ts
 var exports = undefined;
-async function init2() {
+async function initAsync() {
   const go = new Go;
   go.importObject.env = {
     getTermSize: function() {
       return { X: 10, Y: 10 };
     },
-    notify: function(event) {
+    notify: function(ptr, len) {
+      const event = decodeString(ptr, len);
       console.log("notify:", event);
       if (exports)
         console.log(exports.getCanvas());
@@ -58,4 +59,14 @@ async function init2() {
     console.error(err);
   }
 }
-init2();
+function decodeString(ptr, len) {
+  if (!exports)
+    return `<no memory: ${ptr}, ${len}>`;
+  return new TextDecoder().decode(new Uint8Array(exports.memory.buffer, ptr, len));
+}
+
+// web/src/index.ts
+async function initAsync2() {
+  await initAsync();
+}
+initAsync2();

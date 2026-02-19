@@ -8,8 +8,11 @@ import (
 var canvas [][]string = nil
 
 func main() {
+	defer notify("main-exit")
 
 	termSize := getTermSize()
+	fmt.Println("termSize", termSize)
+
 	canvas = make([][]string, termSize.Y)
 
 	// testing notify

@@ -14,6 +14,7 @@ let exports: WasmExports | undefined = undefined;
 
 // TODO :
 // - two-way communication using syscall/js in cmd/wasm/main.go
+//   - most worth seeing is the Invoke example, but it sets a global function accessed via `window`, perhaps thats the way...?
 // - research code-gen to improve DX when adding export/import functions in go
 // - extract game logic into a shared package that can be used by cmd/tui and cmd/wasm
 

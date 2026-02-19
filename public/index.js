@@ -26,6 +26,7 @@ function init() {
   });
 }
 init();
+
 // web/src/wasm.ts
 function init2() {
   console.log("wasm.init");

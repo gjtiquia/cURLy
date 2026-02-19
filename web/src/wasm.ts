@@ -1,10 +1,10 @@
-/** Go WASM runtime from wasm_exec.js (loaded as script before this module). */
+// Go WASM runtime from wasm_exec.js (loaded as script before this module).
 declare const Go: new () => {
     importObject: WebAssembly.Imports;
     run(instance: WebAssembly.Instance): Promise<number>; // returns exit code
 };
 
-/** Exports from our TinyGo WASM module (main.wasm). */
+// Exports from our TinyGo WASM module (main.wasm).
 interface WasmExports extends WebAssembly.Exports {
     multiply(a: number, b: number): number;
 }

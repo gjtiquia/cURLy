@@ -76,7 +76,7 @@ fi
 # ./$EXEC_NAME
 
 echo ""
-echo "Run the following command to play cURLy!"
+echo "Run the following command:"
 echo ""
 printf "${GREEN}./$EXEC_NAME${NC}\n"
 echo ""

@@ -70,7 +70,7 @@ $EXEC_NAME = "cURLy.exe"
 Move-Item -Path $ASSET_NAME -Destination $EXEC_NAME -Force
 
 Write-Host ""
-Write-Host "Run the following command to play cURLy!"
+Write-Host "Run the following command:"
 Write-Host ""
 Write-Host ".\$EXEC_NAME" -ForegroundColor Green
 Write-Host ""

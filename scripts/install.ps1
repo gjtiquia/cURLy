@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # cURLy installer for Windows (PowerShell)
 # Converted from scripts/install.sh
 
@@ -17,7 +18,7 @@ switch -Regex ($SystemType) {
     "ARM64-based" { $ARCH = "arm64" }
     default       {
         Write-Host "Install Failed: cURLy for Windows is only available for 386, amd64, or ARM64. Detected: $SystemType" -ForegroundColor Red
-        exit 1
+        return 1
     }
 }
 
@@ -31,7 +32,12 @@ try {
     $VERSION = $release.tag_name
 } catch {
     Write-Host "Install Failed: Could not fetch latest release information." -ForegroundColor Red
-    exit 1
+    return 1
+}
+
+if ([string]::IsNullOrEmpty($VERSION)) {
+    Write-Host "Install Failed: Could not determine latest version." -ForegroundColor Red
+    return 1
 }
 
 $VERSION_NO_V = $VERSION.TrimStart('v')
@@ -49,12 +55,12 @@ try {
 } catch {
     Write-Host "Install Failed: Could not download $DOWNLOAD_URL" -ForegroundColor Red
     Write-Host "Platform $PLATFORM may be unsupported, or check your network." -ForegroundColor Red
-    exit 1
+    return 1
 }
 
 if (-not (Test-Path $ASSET_NAME)) {
     Write-Host "Install Failed: Downloaded file is missing. Did an antivirus remove it?" -ForegroundColor Red
-    exit 1
+    return 1
 }
 
 Write-Host "Download successful!"

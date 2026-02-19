@@ -6,5 +6,6 @@ snake game with cURL
 # for Linux/Mac
 curl -fsSL cURLy.gjt.io/install.sh | bash
 
-# TODO : for Windows 
+# for Windows 
+powershell -c "irm curly.gjt.io/install.ps1 | iex"
 ```

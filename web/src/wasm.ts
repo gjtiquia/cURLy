@@ -6,7 +6,7 @@ declare const Go: new () => {
 
 // Exports from our TinyGo WASM module (main.wasm).
 interface WasmExports extends WebAssembly.Exports {
-    multiply(a: number, b: number): number;
+    getCanvas(): any; // TODO :
 }
 
 export let exports: WasmExports | undefined = undefined;
@@ -16,8 +16,14 @@ export async function init() {
 
     // import functions for main.wasm to use
     go.importObject.env = {
-        add: function (x: number, y: number) {
-            return x + y;
+        getTermSize: function () {
+            // TODO : should be passed as init arg
+            return { X: 10, Y: 10 };
+        },
+        notify: function (event: string) {
+            console.log("notify:", event);
+
+            if (exports) console.log(exports.getCanvas());
         },
     };
 

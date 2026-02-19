@@ -32,8 +32,13 @@ var exports = undefined;
 async function init2() {
   const go = new Go;
   go.importObject.env = {
-    add: function(x, y) {
-      return x + y;
+    getTermSize: function() {
+      return { X: 10, Y: 10 };
+    },
+    notify: function(event) {
+      console.log("notify:", event);
+      if (exports)
+        console.log(exports.getCanvas());
     }
   };
   if (!WebAssembly.instantiateStreaming) {

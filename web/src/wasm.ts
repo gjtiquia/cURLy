@@ -9,19 +9,17 @@ interface WasmExports extends WebAssembly.Exports {
     multiply(a: number, b: number): number;
 }
 
-export function init() {
-
-    console.log("wasm.init")
-
+export async function init() {
     const go = new Go();
 
-    // Providing the environment object, used in WebAssembly.instantiateStreaming.
-    // This part goes after "const go = new Go();" declaration.
+    // import functions for main.wasm to use
     go.importObject.env = {
         add: function(x: number, y: number) {
             return x + y;
         },
     };
+
+    // TODO : how to run exported functions if wasm needs to wait to fetch, and wasm is long running?
 
     // polyfill if browsers do not support WebAssembly.instantiateStreaming
     if (!WebAssembly.instantiateStreaming) {
@@ -31,16 +29,17 @@ export function init() {
         };
     }
 
-    // fetch wasm
-    WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
+    // fetch wasm and run main.wasm
+    try {
+        const result = await WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject)
         const wasm = result.instance as WebAssembly.Instance & { exports: WasmExports };
-        go.run(wasm); // runs main()
 
-        // Calling the multiply function:
-        console.log('multiplied two numbers:', wasm.exports.multiply(5, 3));
-    }).catch((err) => {
+        console.log("running main.wasm...")
+        const exitCode = await go.run(wasm); // runs main()
+        console.log("main.wasm exit code:", exitCode)
+    } catch (err) {
         console.error(err);
-    });
+    }
 }
 
 init()

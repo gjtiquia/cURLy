@@ -28,8 +28,7 @@ function init() {
 init();
 
 // web/src/wasm.ts
-function init2() {
-  console.log("wasm.init");
+async function init2() {
   const go = new Go;
   go.importObject.env = {
     add: function(x, y) {
@@ -42,12 +41,14 @@ function init2() {
       return await WebAssembly.instantiate(source, importObject);
     };
   }
-  WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
+  try {
+    const result = await WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject);
     const wasm = result.instance;
-    go.run(wasm);
-    console.log("multiplied two numbers:", wasm.exports.multiply(5, 3));
-  }).catch((err) => {
+    console.log("running main.wasm...");
+    const exitCode = await go.run(wasm);
+    console.log("main.wasm exit code:", exitCode);
+  } catch (err) {
     console.error(err);
-  });
+  }
 }
 init2();

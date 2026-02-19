@@ -12,6 +12,11 @@ interface WasmExports extends WebAssembly.Exports {
 
 let exports: WasmExports | undefined = undefined;
 
+// TODO :
+// - two-way communication using syscall/js in cmd/wasm/main.go
+// - research code-gen to improve DX when adding export/import functions in go
+// - extract game logic into a shared package that can be used by cmd/tui and cmd/wasm
+
 export async function initAsync() {
     const go = new Go();
 
@@ -29,8 +34,6 @@ export async function initAsync() {
             if (exports) console.log(exports.getCanvas());
         },
     };
-
-    // TODO : how to run exported functions if wasm needs to wait to fetch, and wasm is long running?
 
     // polyfill if browsers do not support WebAssembly.instantiateStreaming
     if (!WebAssembly.instantiateStreaming) {

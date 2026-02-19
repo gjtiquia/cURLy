@@ -28,6 +28,7 @@ function init() {
 init();
 
 // web/src/wasm.ts
+var exports = undefined;
 async function init2() {
   const go = new Go;
   go.importObject.env = {
@@ -44,6 +45,7 @@ async function init2() {
   try {
     const result = await WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject);
     const wasm = result.instance;
+    exports = wasm.exports;
     console.log("running main.wasm...");
     const exitCode = await go.run(wasm);
     console.log("main.wasm exit code:", exitCode);

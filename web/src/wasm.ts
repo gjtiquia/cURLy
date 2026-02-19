@@ -9,12 +9,14 @@ interface WasmExports extends WebAssembly.Exports {
     multiply(a: number, b: number): number;
 }
 
+export let exports: WasmExports | undefined = undefined;
+
 export async function init() {
     const go = new Go();
 
     // import functions for main.wasm to use
     go.importObject.env = {
-        add: function(x: number, y: number) {
+        add: function (x: number, y: number) {
             return x + y;
         },
     };
@@ -31,15 +33,23 @@ export async function init() {
 
     // fetch wasm and run main.wasm
     try {
-        const result = await WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject)
-        const wasm = result.instance as WebAssembly.Instance & { exports: WasmExports };
+        const result = await WebAssembly.instantiateStreaming(
+            fetch("/public/main.wasm"),
+            go.importObject,
+        );
 
-        console.log("running main.wasm...")
+        const wasm = result.instance as WebAssembly.Instance & {
+            exports: WasmExports;
+        };
+
+        exports = wasm.exports;
+
+        console.log("running main.wasm...");
         const exitCode = await go.run(wasm); // runs main()
-        console.log("main.wasm exit code:", exitCode)
+        console.log("main.wasm exit code:", exitCode);
     } catch (err) {
         console.error(err);
     }
 }
 
-init()
+init();

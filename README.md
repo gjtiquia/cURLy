@@ -14,6 +14,7 @@ powershell -c "irm curly.gjt.io/install.ps1 | iex"
 
 - [Go](https://go.dev/doc/install)
 - [Air](https://github.com/air-verse/air?tab=readme-ov-file#installation)
+- [Bun](https://bun.sh/)
 
 ## tasks
 
@@ -26,14 +27,15 @@ go run ./cmd/build
 ```
 
 ```bash
-# run web server (port 3000 by default)
-go run ./cmd/server
-
-# run web server on specific port
-PORT=4321 go run ./cmd/server
+# install dependencies
+bun install
 
 # run web server on port 3000 with live reload
+# also generates tailwind classes
 air
+
+# build tailwind classes
+bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
 
 # build web server
 go build -o ./bin/server ./cmd/server

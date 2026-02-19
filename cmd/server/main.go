@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -22,6 +23,9 @@ func main() {
 	http.HandleFunc("GET /install.sh", bashInstallHandler)
 	http.HandleFunc("GET /install.ps1", powershellInstallHandler)
 
+	fs := http.FileServer(http.Dir("./public"))
+	http.Handle("GET /public/", http.StripPrefix("/public/", fs))
+
 	port, ok := os.LookupEnv("PORT")
 	if !ok {
 		port = "3000"
@@ -30,6 +34,21 @@ func main() {
 
 	err := http.ListenAndServe(":"+port, nil)
 	log.Fatal(err)
+}
+
+func getCurrentVersion() string {
+	version, ok := os.LookupEnv("VERSION")
+	if ok {
+		return version
+	}
+
+	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	bytes, err := cmd.Output()
+	if err != nil {
+		return "000000"
+	}
+
+	return string(bytes)
 }
 
 func homePageHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +69,9 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := t.Execute(w, nil); err != nil {
+	version := getCurrentVersion()
+
+	if err := t.Execute(w, version); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

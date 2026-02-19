@@ -21,6 +21,11 @@ powershell -c "irm curly.gjt.io/install.ps1 | iex"
 # run cURLy tui
 go run ./cmd/tui
 
+# build cURLy tui executables
+go run ./cmd/build
+```
+
+```bash
 # run web server (port 3000 by default)
 go run ./cmd/server
 
@@ -32,4 +37,7 @@ air
 
 # build web server
 go build -o ./bin/server ./cmd/server
+
+# run web server on specific port
+PORT=4321 ./bin/server
 ```

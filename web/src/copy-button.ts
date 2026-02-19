@@ -7,26 +7,26 @@ export function init() {
         const button = event.target as HTMLElement;
         if (!button.matches("[data-copy-button]")) return;
 
-        const codeElement = button.parentElement?.querySelector("code")
+        const codeElement = button.parentElement?.querySelector("code");
         if (codeElement) {
             if (button.innerHTML == "Copied!") {
-                console.log("[data-copy-button] debounced!")
+                console.log("[data-copy-button] debounced!");
                 return;
             }
 
-            const code = codeElement.innerHTML
+            const code = codeElement.innerHTML;
             await navigator.clipboard.writeText(code);
 
-            console.log("[data-copy-button] copied ", code)
+            console.log("[data-copy-button] copied ", code);
 
-            const originalInnerHTML = button.innerHTML
-            button.innerHTML = "Copied!"
+            const originalInnerHTML = button.innerHTML;
+            button.innerHTML = "Copied!";
 
-            await sleepAsync(3000)
+            await sleepAsync(3000);
 
-            button.innerHTML = originalInnerHTML
+            button.innerHTML = originalInnerHTML;
         }
     });
 }
 
-init()
+init();

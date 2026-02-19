@@ -9,15 +9,34 @@
     <script type="module" src="/public/index.js?={{.}}"></script>
     <script src="/public/wasm_exec.js"></script>
     <script>
-        if (!WebAssembly.instantiateStreaming) { // polyfill
+        const go = new Go();
+
+        // Providing the environment object, used in WebAssembly.instantiateStreaming.
+        // This part goes after "const go = new Go();" declaration.
+        go.importObject.env = {
+            'add': function (x, y) {
+                return x + y
+            }
+            // ... other functions
+        }
+
+        // polyfill if browsers do not support WebAssembly.instantiateStreaming
+        if (!WebAssembly.instantiateStreaming) {
             WebAssembly.instantiateStreaming = async (resp, importObject) => {
                 const source = await (await resp).arrayBuffer();
                 return await WebAssembly.instantiate(source, importObject);
             };
         }
-        const go = new Go();
+
+        // fetch wasm
         WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
-            go.run(result.instance);
+            wasm = result.instance
+            go.run(wasm); // this also calls main()
+
+            // Calling the multiply function:
+            console.log('multiplied two numbers:', wasm.exports.multiply(5, 3));
+        }).catch((err) => {
+            console.error(err);
         });
     </script>
     <link href="/public/styles.css?v={{.}}" rel="stylesheet" />

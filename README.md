@@ -13,6 +13,7 @@ powershell -c "irm curly.gjt.io/install.ps1 | iex"
 ## pre-requisites
 
 - [Go](https://go.dev/doc/install)
+- [TinyGo](https://tinygo.org/getting-started/install/)
 - [Air](https://github.com/air-verse/air?tab=readme-ov-file#installation)
 - [Bun](https://bun.sh/)
 
@@ -41,7 +42,7 @@ bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
 bun build ./web/src/index.ts --outdir=./public
 
 # build wasm
-GOOS=js GOARCH=wasm go build -o ./public/main.wasm ./cmd/wasm
+GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./cmd/wasm
 
 # build web server
 go build -o ./bin/server ./cmd/server

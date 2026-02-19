@@ -9,8 +9,17 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", homePageHandler)
-	http.HandleFunc("/install.sh", installPageHandler)
+	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		// cuz in Go "/" is a catch-all
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		homePageHandler(w, r)
+	})
+	http.HandleFunc("GET /install.sh", bashInstallHandler)
+	http.HandleFunc("GET /install.ps1", powershellInstallHandler)
 
 	port, ok := os.LookupEnv("PORT")
 	if !ok {
@@ -37,8 +46,17 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func installPageHandler(w http.ResponseWriter, r *http.Request) {
+func bashInstallHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, err := os.ReadFile("./scripts/install.sh")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "%s", string(bytes))
+}
+
+func powershellInstallHandler(w http.ResponseWriter, r *http.Request) {
+	bytes, err := os.ReadFile("./scripts/install.ps1")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

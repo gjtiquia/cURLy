@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -40,9 +41,18 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 
 	if isCurl(r) {
 		fmt.Fprintf(w, "%s", string(bytes))
-	} else {
-		// TODO : proper html and styling
-		fmt.Fprintf(w, "%s", string(bytes))
+		return
+	}
+
+	t, err := template.ParseFiles("./web/index.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := t.Execute(w, nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 

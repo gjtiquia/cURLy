@@ -97,6 +97,6 @@ func powershellInstallHandler(w http.ResponseWriter, r *http.Request) {
 
 func isCurl(r *http.Request) bool {
 	userAgent := strings.ToLower(r.UserAgent())
-	isCurl := strings.Contains(userAgent, "curl")
+	isCurl := strings.Contains(userAgent, "curl") || strings.Contains(userAgent, "powershell")
 	return isCurl
 }

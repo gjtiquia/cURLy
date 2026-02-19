@@ -31,7 +31,7 @@ go run ./cmd/build
 bun install
 
 # run web server on port 3000 with live reload
-# also generates tailwind classes
+# also generates tailwind classes, bundles typescript, builds wasm
 air
 
 # build tailwind classes
@@ -39,6 +39,9 @@ bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
 
 # bundle TypeScript scripts
 bun build ./web/src/index.ts --outdir=./public
+
+# build wasm
+GOOS=js GOARCH=wasm go build -o ./public/main.wasm ./cmd/wasm
 
 # build web server
 go build -o ./bin/server ./cmd/server

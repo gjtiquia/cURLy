@@ -8,7 +8,11 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  pre_cmd = ["bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css", "bun build ./web/src/index.ts --outdir=./public"]
+  pre_cmd = [
+    "bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css",
+    "bun build ./web/src/index.ts --outdir=./public",
+    "GOOS=js GOARCH=wasm go build -o ./public/main.wasm ./cmd/wasm",
+  ]
   cmd = "go build -o ./tmp/main ./cmd/server"
   post_cmd = []
   delay = 1000

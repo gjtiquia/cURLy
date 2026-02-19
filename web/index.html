@@ -7,6 +7,19 @@
     <!-- <script src="/public/packages/htmx/htmx.min.js"></script> -->
     <!-- <script src="/public/packages/htmx/htmx-ext-ws.min.js"></script> -->
     <script type="module" src="/public/index.js?={{.}}"></script>
+    <script src="/public/wasm_exec.js"></script>
+    <script>
+        if (!WebAssembly.instantiateStreaming) { // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
+    </script>
     <link href="/public/styles.css?v={{.}}" rel="stylesheet" />
     <title>
         cURLy

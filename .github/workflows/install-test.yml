@@ -1,0 +1,120 @@
+# Build the web server, serve install scripts at localhost:3000, then test the one-liners
+# (curl | bash and irm | iex). Requires at least one GitHub release to exist.
+
+name: Install script tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/install.sh'
+      - 'scripts/install.ps1'
+      - 'cmd/server/**'
+      - 'go.mod'
+      - '.github/workflows/install-test.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/install.sh'
+      - 'scripts/install.ps1'
+      - 'cmd/server/**'
+      - 'go.mod'
+      - '.github/workflows/install-test.yml'
+
+jobs:
+  install-unix:
+    name: install.sh (${{ matrix.os }}-${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            runner: ubuntu-22.04
+          - os: linux
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - os: macos
+            arch: amd64
+            runner: macos-13
+          - os: macos
+            arch: arm64
+            runner: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build server
+        run: go build -o server ./cmd/server
+
+      - name: Serve and test one-liner
+        run: |
+          ./server &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/install.sh | grep -q 200; then break; fi
+            sleep 1
+          done
+          mkdir -p _install_test && cd _install_test
+          curl -fsSL http://localhost:3000/install.sh | bash
+          test -f cURLy || (echo "Binary cURLy not found" && exit 1)
+          test -x cURLy || (echo "Binary not executable" && exit 1)
+          ./cURLy &
+          GAME_PID=$!
+          sleep 3
+          kill $GAME_PID 2>/dev/null || true
+          test -f log.txt || (echo "log.txt not found after running game" && exit 1)
+
+  install-windows:
+    name: install.ps1 (windows-${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: windows-2022
+          - arch: arm64
+            runner: windows-11-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build server
+        run: go build -o server.exe ./cmd/server
+
+      - name: Serve and test one-liner
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath .\server.exe -PassThru
+          try {
+            $url = 'http://localhost:3000/install.ps1'
+            for ($i = 1; $i -le 10; $i++) {
+              try {
+                $r = Invoke-WebRequest -Uri $url -UseBasicParsing -ErrorAction Stop
+                if ($r.StatusCode -eq 200) { break }
+              } catch { Start-Sleep -Seconds 1 }
+            }
+            New-Item -ItemType Directory -Force -Path _install_test | Out-Null
+            Set-Location _install_test
+            Invoke-RestMethod -Uri $url | Invoke-Expression
+            if (-not (Test-Path cURLy.exe)) { throw 'Binary cURLy.exe not found' }
+            $game = Start-Process -FilePath .\cURLy.exe -PassThru
+            Start-Sleep -Seconds 3
+            Stop-Process -Id $game.Id -Force -ErrorAction SilentlyContinue
+            if (-not (Test-Path log.txt)) { throw 'log.txt not found after running game' }
+          } finally {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          }

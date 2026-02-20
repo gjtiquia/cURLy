@@ -34,6 +34,10 @@ export function createExports(size: Vector2) {
             const len = sliceDataView.getUint32(0 + 4, true);
             const cap = sliceDataView.getUint32(0 + 4 + 4, true);
 
+            // TODO : probably each byte should correspond to a canvas cell type
+            // then we map the corresponding (byte) cellId to cellChar
+            // decoupling the game logic from the "graphics"
+
             let out = "";
             for (let y = 0; y < size.Y; y++) {
                 const rowBytes = new Uint8Array(

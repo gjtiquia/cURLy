@@ -27,6 +27,20 @@ function init() {
 }
 init();
 
+// web/src/ruler.ts
+function getMaxCharPerLine() {
+  const ruler = document.body.querySelector("[data-ruler]");
+  if (!ruler) {
+    console.error("initAsync:", "cannot find [data-ruler]!", "returning 0...");
+    return 0;
+  }
+  const rect = ruler.getBoundingClientRect();
+  const text = ruler.innerHTML;
+  const charWidth = rect.width / text.length;
+  const maxCharCount = window.innerWidth / charWidth;
+  return maxCharCount;
+}
+
 // web/src/wasm/exports.ts
 var textDecoder = new TextDecoder;
 function createExports(size) {
@@ -82,7 +96,11 @@ async function initAsync(size) {
 }
 // web/src/index.ts
 async function initAsync2() {
-  const size = { X: 4, Y: 4 };
+  const size = { X: 32, Y: 16 };
+  const maxSizeX = getMaxCharPerLine();
+  if (size.X >= maxSizeX) {
+    return;
+  }
   await initAsync(size);
 }
 initAsync2();

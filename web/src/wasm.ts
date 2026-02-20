@@ -10,59 +10,62 @@ interface WasmExports extends WebAssembly.Exports {
     getCanvasCellsAddr(): number;
 }
 
-let exports: WasmExports | undefined = undefined;
+type Wasm = WebAssembly.Instance & { exports: WasmExports };
+
+let wasm: Wasm | undefined = undefined;
 
 // TODO :
-// - two-way communication using syscall/js in cmd/wasm/main.go
-//   - most worth seeing is the Invoke example, but it sets a global function accessed via `window`, perhaps thats the way...?
+// - two-way communication with go wasm
 // - research code-gen to improve DX when adding export/import functions in go
 // - extract game logic into a shared package that can be used by cmd/tui and cmd/wasm
 
 const textDecoder = new TextDecoder();
 
 export async function initAsync() {
+    // TODO : hardcode for now, should pass in as arg
+    const size = { X: 4, Y: 4 };
+
     const go = new Go();
 
     // import functions for main.wasm to use
     // TinyGo passes string args as (ptr, len) into linear memory, not as JS strings.
     go.importObject.env = {
-        // TODO : work this out later
-        getTermSize: function () {
-            return { X: 10, Y: 10 };
+        getTermSize: function (ptr: number) {
+            if (!wasm) return;
+
+            // directly setting Go's struct fields
+            const view = new Int32Array(wasm.exports.memory.buffer, ptr, 2);
+            view[0] = size.X;
+            view[1] = size.Y;
         },
         notify: function (eventId: number) {
+            if (!wasm) return;
+
             console.log("notify:", eventId);
 
-            if (exports) {
-                // TODO : hardcode for now
-                const size = { X: 4, Y: 4 };
+            // getCanvasCellsAddr() returns the address of the Go slice *header*,
+            // not the byte data. Slice header is [ptr: 4 bytes, len: 4 bytes, cap: 4 bytes].
+            const sliceAddr = wasm.exports.getCanvasCellsAddr();
+            const sliceDataView = new DataView(
+                wasm.exports.memory.buffer,
+                sliceAddr,
+                12,
+            );
+            const ptr = sliceDataView.getUint32(0, true); // true = little-endian, the least significant byte is stored first, which Go's runtime uses
+            const len = sliceDataView.getUint32(4, true);
+            const cap = sliceDataView.getUint32(8, true);
 
-                // getCanvasCellsAddr() returns the address of the Go slice *header*,
-                // not the byte data. Slice header is [ptr: 4 bytes, len: 4 bytes, cap: 4 bytes].
-                const sliceAddr = exports.getCanvasCellsAddr();
-                const sliceDataView = new DataView(
-                    exports.memory.buffer,
-                    sliceAddr,
-                    12,
+            let out = "";
+            for (let y = 0; y < size.Y; y++) {
+                const rowBytes = new Uint8Array(
+                    wasm.exports.memory.buffer,
+                    ptr + y * size.X,
+                    size.X,
                 );
-                const ptr = sliceDataView.getUint32(0, true); // true = little-endian, the least significant byte is stored first, which Go's runtime uses
-                const len = sliceDataView.getUint32(4, true);
-                const cap = sliceDataView.getUint32(8, true);
-
-                let out = "";
-                for (let y = 0; y < size.Y; y++) {
-                    const rowBytes = new Uint8Array(
-                        exports.memory.buffer,
-                        ptr + y * size.X,
-                        size.X,
-                    );
-                    out += textDecoder.decode(rowBytes);
-                    out += "\n";
-                }
-                console.log(out);
-
-                // console.log(decodeString(ptr, len));
+                out += textDecoder.decode(rowBytes);
+                out += "\n";
             }
+            console.log(out);
         },
     };
 
@@ -81,11 +84,7 @@ export async function initAsync() {
             go.importObject,
         );
 
-        const wasm = result.instance as WebAssembly.Instance & {
-            exports: WasmExports;
-        };
-
-        exports = wasm.exports;
+        wasm = result.instance as Wasm;
 
         console.log("running main.wasm...");
         const exitCode = await go.run(wasm); // runs main()

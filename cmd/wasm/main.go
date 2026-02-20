@@ -10,10 +10,9 @@ import (
 var canvas Canvas
 
 func main() {
-	defer notify(MainExit)
+	defer Notify(MainExit)
 
-	// termSize := getTermSize()
-	termSize := vector2.New(4, 4) // TODO : temp until we figure out js/go bridge
+	termSize := GetTermSize()
 	fmt.Println("termSize", termSize)
 
 	canvas = CreateCanvas(termSize, ' ')
@@ -21,7 +20,7 @@ func main() {
 	// testing notify
 	for i := 0; i < termSize.X; i++ {
 		canvas.SetCell(vector2.New(i, 1), byte('x'))
-		notify(CanvasUpdated)
+		Notify(CanvasUpdated)
 
 		time.Sleep(1 * time.Second)
 	}

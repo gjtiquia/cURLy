@@ -28,32 +28,36 @@ function init() {
 init();
 
 // web/src/wasm.ts
-var exports = undefined;
+var wasm = undefined;
 var textDecoder = new TextDecoder;
 async function initAsync() {
+  const size = { X: 4, Y: 4 };
   const go = new Go;
   go.importObject.env = {
-    getTermSize: function() {
-      return { X: 10, Y: 10 };
+    getTermSize: function(ptr) {
+      if (!wasm)
+        return;
+      const view = new Int32Array(wasm.exports.memory.buffer, ptr, 2);
+      view[0] = size.X;
+      view[1] = size.Y;
     },
     notify: function(eventId) {
+      if (!wasm)
+        return;
       console.log("notify:", eventId);
-      if (exports) {
-        const size = { X: 4, Y: 4 };
-        const sliceAddr = exports.getCanvasCellsAddr();
-        const sliceDataView = new DataView(exports.memory.buffer, sliceAddr, 12);
-        const ptr = sliceDataView.getUint32(0, true);
-        const len = sliceDataView.getUint32(4, true);
-        const cap = sliceDataView.getUint32(8, true);
-        let out = "";
-        for (let y = 0;y < size.Y; y++) {
-          const rowBytes = new Uint8Array(exports.memory.buffer, ptr + y * size.X, size.X);
-          out += textDecoder.decode(rowBytes);
-          out += `
+      const sliceAddr = wasm.exports.getCanvasCellsAddr();
+      const sliceDataView = new DataView(wasm.exports.memory.buffer, sliceAddr, 12);
+      const ptr = sliceDataView.getUint32(0, true);
+      const len = sliceDataView.getUint32(4, true);
+      const cap = sliceDataView.getUint32(8, true);
+      let out = "";
+      for (let y = 0;y < size.Y; y++) {
+        const rowBytes = new Uint8Array(wasm.exports.memory.buffer, ptr + y * size.X, size.X);
+        out += textDecoder.decode(rowBytes);
+        out += `
 `;
-        }
-        console.log(out);
       }
+      console.log(out);
     }
   };
   if (!WebAssembly.instantiateStreaming) {
@@ -64,8 +68,7 @@ async function initAsync() {
   }
   try {
     const result = await WebAssembly.instantiateStreaming(fetch("/public/main.wasm"), go.importObject);
-    const wasm = result.instance;
-    exports = wasm.exports;
+    wasm = result.instance;
     console.log("running main.wasm...");
     const exitCode = await go.run(wasm);
     console.log("main.wasm exit code:", exitCode);

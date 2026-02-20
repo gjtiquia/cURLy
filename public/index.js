@@ -27,13 +27,10 @@ function init() {
 }
 init();
 
-// web/src/wasm.ts
-var wasm = undefined;
+// web/src/wasm/exports.ts
 var textDecoder = new TextDecoder;
-async function initAsync() {
-  const size = { X: 4, Y: 4 };
-  const go = new Go;
-  go.importObject.env = {
+function createExports(size) {
+  return {
     getTermSize: function(ptr) {
       if (!wasm)
         return;
@@ -60,6 +57,13 @@ async function initAsync() {
       console.log(out);
     }
   };
+}
+
+// web/src/wasm/wasm.ts
+var wasm = undefined;
+async function initAsync(size) {
+  const go = new Go;
+  go.importObject.env = createExports(size);
   if (!WebAssembly.instantiateStreaming) {
     WebAssembly.instantiateStreaming = async (resp, importObject) => {
       const source = await (await resp).arrayBuffer();
@@ -76,9 +80,9 @@ async function initAsync() {
     console.error(err);
   }
 }
-
 // web/src/index.ts
 async function initAsync2() {
-  await initAsync();
+  const size = { X: 4, Y: 4 };
+  await initAsync(size);
 }
 initAsync2();

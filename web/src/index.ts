@@ -4,7 +4,10 @@ import {} from "./copy-button";
 import * as wasm from "./wasm";
 
 async function initAsync() {
-    await wasm.initAsync();
+    // TODO : hardcode for now, should be set at runtime
+    const size = { X: 4, Y: 4 };
+
+    await wasm.initAsync(size);
 }
 
 initAsync();

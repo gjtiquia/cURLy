@@ -50,3 +50,6 @@ go build -o ./bin/server ./cmd/server
 # run web server on specific port
 PORT=4321 ./bin/server
 ```
+
+## todos
+- [ ] Makefile with build command, including TypeScript typecheck

@@ -16,11 +16,11 @@ func main() {
 	termSize := vector2.New(4, 4) // TODO : temp until we figure out js/go bridge
 	fmt.Println("termSize", termSize)
 
-	canvas = CreateCanvas(termSize)
+	canvas = CreateCanvas(termSize, ' ')
 
 	// testing notify
-	for i := 1; i <= 10; i++ {
-		// canvas.SetCell(vector2.New(i, 0), 0)
+	for i := 0; i < termSize.X; i++ {
+		canvas.SetCell(vector2.New(i, 1), byte('x'))
 		notify(CanvasUpdated)
 
 		time.Sleep(1 * time.Second)
@@ -39,11 +39,12 @@ type Canvas struct {
 	cells []byte
 }
 
-func CreateCanvas(size vector2.Type) Canvas {
-	return Canvas{
-		size:  size,
-		cells: make([]byte, size.Y*size.X),
+func CreateCanvas(size vector2.Type, defaultCell byte) Canvas {
+	cells := make([]byte, size.Y*size.X)
+	for i := range cells {
+		cells[i] = defaultCell
 	}
+	return Canvas{size, cells}
 }
 
 func (this *Canvas) SetCell(pos vector2.Type, value byte) {

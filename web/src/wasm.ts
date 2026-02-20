@@ -18,6 +18,8 @@ let exports: WasmExports | undefined = undefined;
 // - research code-gen to improve DX when adding export/import functions in go
 // - extract game logic into a shared package that can be used by cmd/tui and cmd/wasm
 
+const textDecoder = new TextDecoder();
+
 export async function initAsync() {
     const go = new Go();
 
@@ -32,16 +34,34 @@ export async function initAsync() {
             console.log("notify:", eventId);
 
             if (exports) {
-                const addr = exports.getCanvasCellsAddr();
-                console.log("canvas cells addr:", exports.getCanvasCellsAddr());
-
                 // TODO : hardcode for now
                 const size = { X: 4, Y: 4 };
-                const len = size.X * size.Y;
 
-                const bytes = new Uint8Array(exports.memory.buffer, addr, len);
-                console.log("canvas cells bytes:", bytes);
-                console.log("canvas cells bytes[0]:", bytes[0]);
+                // getCanvasCellsAddr() returns the address of the Go slice *header*,
+                // not the byte data. Slice header is [ptr: 4 bytes, len: 4 bytes, cap: 4 bytes].
+                const sliceAddr = exports.getCanvasCellsAddr();
+                const sliceDataView = new DataView(
+                    exports.memory.buffer,
+                    sliceAddr,
+                    12,
+                );
+                const ptr = sliceDataView.getUint32(0, true); // true = little-endian, the least significant byte is stored first, which Go's runtime uses
+                const len = sliceDataView.getUint32(4, true);
+                const cap = sliceDataView.getUint32(8, true);
+
+                let out = "";
+                for (let y = 0; y < size.Y; y++) {
+                    const rowBytes = new Uint8Array(
+                        exports.memory.buffer,
+                        ptr + y * size.X,
+                        size.X,
+                    );
+                    out += textDecoder.decode(rowBytes);
+                    out += "\n";
+                }
+                console.log(out);
+
+                // console.log(decodeString(ptr, len));
             }
         },
     };
@@ -73,12 +93,4 @@ export async function initAsync() {
     } catch (err) {
         console.error(err);
     }
-}
-
-function decodeString(ptr: number, len: number): string {
-    if (!exports) return `<no memory: ${ptr}, ${len}>`;
-
-    return new TextDecoder().decode(
-        new Uint8Array(exports.memory.buffer, ptr, len),
-    );
 }

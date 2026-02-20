@@ -29,6 +29,7 @@ init();
 
 // web/src/wasm.ts
 var exports = undefined;
+var textDecoder = new TextDecoder;
 async function initAsync() {
   const go = new Go;
   go.importObject.env = {
@@ -38,13 +39,20 @@ async function initAsync() {
     notify: function(eventId) {
       console.log("notify:", eventId);
       if (exports) {
-        const addr = exports.getCanvasCellsAddr();
-        console.log("canvas cells addr:", exports.getCanvasCellsAddr());
         const size = { X: 4, Y: 4 };
-        const len = size.X * size.Y;
-        const bytes = new Uint8Array(exports.memory.buffer, addr, len);
-        console.log("canvas cells bytes:", bytes);
-        console.log("canvas cells bytes[0]:", bytes[0]);
+        const sliceAddr = exports.getCanvasCellsAddr();
+        const sliceDataView = new DataView(exports.memory.buffer, sliceAddr, 12);
+        const ptr = sliceDataView.getUint32(0, true);
+        const len = sliceDataView.getUint32(4, true);
+        const cap = sliceDataView.getUint32(8, true);
+        let out = "";
+        for (let y = 0;y < size.Y; y++) {
+          const rowBytes = new Uint8Array(exports.memory.buffer, ptr + y * size.X, size.X);
+          out += textDecoder.decode(rowBytes);
+          out += `
+`;
+        }
+        console.log(out);
       }
     }
   };

@@ -5,6 +5,6 @@ package main
 // must use the //export directive for TinyGo
 
 //export getCanvasCellsAddr
-func getCanvasCellsAddr() []byte {
-	return canvas.cells
+func getCanvasCellsAddr() *[]byte {
+	return &canvas.cells
 }

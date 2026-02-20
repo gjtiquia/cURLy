@@ -35,11 +35,17 @@ async function initAsync() {
     getTermSize: function() {
       return { X: 10, Y: 10 };
     },
-    notify: function(ptr, len) {
-      const event = decodeString(ptr, len);
-      console.log("notify:", event);
-      if (exports)
-        console.log(exports.getCanvas());
+    notify: function(eventId) {
+      console.log("notify:", eventId);
+      if (exports) {
+        const addr = exports.getCanvasCellsAddr();
+        console.log("canvas cells addr:", exports.getCanvasCellsAddr());
+        const size = { X: 4, Y: 4 };
+        const len = size.X * size.Y;
+        const bytes = new Uint8Array(exports.memory.buffer, addr, len);
+        console.log("canvas cells bytes:", bytes);
+        console.log("canvas cells bytes[0]:", bytes[0]);
+      }
     }
   };
   if (!WebAssembly.instantiateStreaming) {
@@ -58,11 +64,6 @@ async function initAsync() {
   } catch (err) {
     console.error(err);
   }
-}
-function decodeString(ptr, len) {
-  if (!exports)
-    return `<no memory: ${ptr}, ${len}>`;
-  return new TextDecoder().decode(new Uint8Array(exports.memory.buffer, ptr, len));
 }
 
 // web/src/index.ts

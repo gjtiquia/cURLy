@@ -7,7 +7,7 @@ declare const Go: new () => {
 // Exports from our TinyGo WASM module (main.wasm).
 interface WasmExports extends WebAssembly.Exports {
     memory: WebAssembly.Memory;
-    getCanvas(): any; // TODO :
+    getCanvasCellsAddr(): number;
 }
 
 let exports: WasmExports | undefined = undefined;
@@ -24,15 +24,25 @@ export async function initAsync() {
     // import functions for main.wasm to use
     // TinyGo passes string args as (ptr, len) into linear memory, not as JS strings.
     go.importObject.env = {
+        // TODO : work this out later
         getTermSize: function () {
-            // TODO : should be passed as init arg
             return { X: 10, Y: 10 };
         },
-        notify: function (ptr: number, len: number) {
-            const event = decodeString(ptr, len);
-            console.log("notify:", event);
+        notify: function (eventId: number) {
+            console.log("notify:", eventId);
 
-            if (exports) console.log(exports.getCanvas());
+            if (exports) {
+                const addr = exports.getCanvasCellsAddr();
+                console.log("canvas cells addr:", exports.getCanvasCellsAddr());
+
+                // TODO : hardcode for now
+                const size = { X: 4, Y: 4 };
+                const len = size.X * size.Y;
+
+                const bytes = new Uint8Array(exports.memory.buffer, addr, len);
+                console.log("canvas cells bytes:", bytes);
+                console.log("canvas cells bytes[0]:", bytes[0]);
+            }
         },
     };
 

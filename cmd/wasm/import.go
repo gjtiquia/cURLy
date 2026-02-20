@@ -11,4 +11,4 @@ import "github.com/gjtiquia/cURLy/internal/vector2"
 func getTermSize() vector2.Type
 
 //export notify
-func notify(event string)
+func notify(event NotifyEvent)

@@ -1,3 +1,4 @@
+import { type Vector2 } from "../vector2";
 import { wasm } from "./wasm";
 
 const textDecoder = new TextDecoder();
@@ -5,7 +6,7 @@ const textDecoder = new TextDecoder();
 // TODO : probably make a Vector2 type
 
 // functions exported to Go
-export function createExports(size: { X: number; Y: number }) {
+export function createExports(size: Vector2) {
     return {
         getTermSize: function (ptr: number) {
             if (!wasm) return;

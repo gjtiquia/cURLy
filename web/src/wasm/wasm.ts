@@ -1,3 +1,4 @@
+import { type Vector2 } from "../vector2";
 import { createExports } from "./exports";
 import { type Imports } from "./imports";
 
@@ -16,7 +17,7 @@ type Wasm = WebAssembly.Instance & { exports: WasmExports };
 
 export let wasm: Wasm | undefined = undefined;
 
-export async function initAsync(size: { X: number; Y: number }) {
+export async function initAsync(size: Vector2) {
     const go = new Go();
 
     // import functions for main.wasm to use

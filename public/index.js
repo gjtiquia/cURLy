@@ -42,11 +42,11 @@ function createExports(size) {
       if (!wasm)
         return;
       console.log("notify:", eventId);
-      const sliceAddr = wasm.exports.getCanvasCellsAddr();
-      const sliceDataView = new DataView(wasm.exports.memory.buffer, sliceAddr, 12);
+      const slicePtr = wasm.exports.getCanvasCellsPtr();
+      const sliceDataView = new DataView(wasm.exports.memory.buffer, slicePtr, 4 + 4 + 4);
       const ptr = sliceDataView.getUint32(0, true);
-      const len = sliceDataView.getUint32(4, true);
-      const cap = sliceDataView.getUint32(8, true);
+      const len = sliceDataView.getUint32(0 + 4, true);
+      const cap = sliceDataView.getUint32(0 + 4 + 4, true);
       let out = "";
       for (let y = 0;y < size.Y; y++) {
         const rowBytes = new Uint8Array(wasm.exports.memory.buffer, ptr + y * size.X, size.X);

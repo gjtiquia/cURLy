@@ -1,6 +1,9 @@
 package main
 
-import "github.com/gjtiquia/cURLy/internal/game/canvas"
+import (
+	"github.com/gjtiquia/cURLy/internal/game/canvas"
+	"github.com/gjtiquia/cURLy/internal/game/input"
+)
 
 // These function are exported to JavaScript, so can be called using exports.someFunc() in JavaScript.
 
@@ -12,7 +15,7 @@ func getCanvasCellsPtr() *[]canvas.CellType {
 }
 
 //export onInputAction
-func onInputAction(id byte) {
+func onInputAction(id input.Action) {
 	if inputCh != nil {
 		inputCh <- id
 	}

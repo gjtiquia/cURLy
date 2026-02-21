@@ -3,7 +3,10 @@ package canvas
 import "github.com/gjtiquia/cURLy/internal/vector2"
 
 type Canvas struct {
-	Size  vector2.Type
+	Size vector2.Type
+
+	// use 1D array rather than 2D array of arrays
+	// More performant, all in one block, and also easier to parse via pointer and length
 	Cells []CellType
 }
 type Type = Canvas

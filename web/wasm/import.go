@@ -9,9 +9,11 @@ import (
 
 // must use the //export directive for TinyGo
 
+// JS_ prefix is to easily see that we are calling imported JS functions
+
 //export getTermSize
 func getTermSize(ptr *vector2.Type)
-func GetTermSize() vector2.Type { // a wrapper
+func JS_GetTermSize() vector2.Type { // a wrapper
 	var termSize vector2.Type
 	getTermSize(&termSize)
 	return termSize
@@ -19,6 +21,6 @@ func GetTermSize() vector2.Type { // a wrapper
 
 //export notify
 func notify(event byte)
-func Notify(event NotifyEvent) {
+func JS_Notify(event NotifyEvent) {
 	notify(byte(event))
 }

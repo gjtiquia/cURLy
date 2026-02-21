@@ -41,6 +41,27 @@ function getMaxCharPerLine() {
   return maxCharCount;
 }
 
+// web/src/game/index.ts
+var gridElement = undefined;
+function init2() {
+  const el = document.body.querySelector("[data-game-grid]");
+  if (!el)
+    return { ok: false, error: "cannot find [data-game-grid]!" };
+  gridElement = el;
+  return { ok: true };
+}
+function getSize() {
+  const size = { X: 32, Y: 12 };
+  return size;
+}
+function setText(text) {
+  if (!gridElement) {
+    console.error("game: gridElement undefined!");
+    return;
+  }
+  gridElement.innerHTML = text;
+}
+
 // web/src/wasm/exports.ts
 var textDecoder = new TextDecoder;
 function createExports(size) {
@@ -55,7 +76,6 @@ function createExports(size) {
     notify: function(eventId) {
       if (!wasm)
         return;
-      console.log("notify:", eventId);
       const slicePtr = wasm.exports.getCanvasCellsPtr();
       const sliceDataView = new DataView(wasm.exports.memory.buffer, slicePtr, 4 + 4 + 4);
       const ptr = sliceDataView.getUint32(0, true);
@@ -68,7 +88,7 @@ function createExports(size) {
         out += `
 `;
       }
-      console.log(out);
+      setText(out);
     }
   };
 }
@@ -96,9 +116,15 @@ async function initAsync(size) {
 }
 // web/src/index.ts
 async function initAsync2() {
-  const size = { X: 32, Y: 16 };
+  const { ok, error } = init2();
+  if (!ok) {
+    console.error("initAsync:", error);
+    return;
+  }
+  const size = getSize();
   const maxSizeX = getMaxCharPerLine();
   if (size.X >= maxSizeX) {
+    console.error("initAsync:", "game.size.X", size.X, ">= maxCharPerLine", maxSizeX);
     return;
   }
   await initAsync(size);

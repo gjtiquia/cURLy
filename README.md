@@ -52,4 +52,4 @@ PORT=4321 ./bin/server
 ```
 
 ## todos
-- [ ] Makefile with build command, including TypeScript typecheck
+- [ ] Makefile with build command, including TypeScript typecheck, and minified outputs

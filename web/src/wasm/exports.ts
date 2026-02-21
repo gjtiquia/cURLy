@@ -1,3 +1,4 @@
+import * as game from "../game";
 import { type Vector2 } from "../vector2";
 import { wasm } from "./wasm";
 
@@ -18,7 +19,8 @@ export function createExports(size: Vector2) {
         notify: function (eventId: number) {
             if (!wasm) return;
 
-            console.log("notify:", eventId);
+            // TODO : differentiate between different events (if necessary and hv more events to listen to)
+            // console.log("notify:", eventId);
 
             // ptr returns the address of the Go slice header, not the byte data.
             // Slice header is [ptr: 4 bytes, len: 4 bytes, cap: 4 bytes].
@@ -48,7 +50,8 @@ export function createExports(size: Vector2) {
                 out += textDecoder.decode(rowBytes);
                 out += "\n";
             }
-            console.log(out);
+
+            game.setText(out);
         },
     };
 }

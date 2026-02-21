@@ -14,7 +14,7 @@
     </title>
 </head>
 
-<body class="p-2 font-fira bg-stone-900 text-stone-50">
+<body class="h-dvh p-2 font-fira bg-stone-900 text-stone-50 flex flex-col">
     <header>
         <h1 class="font-bold pb-1 text-center">
             <a href="https://github.com/gjtiquia/cURLy" target="_blank">
@@ -22,7 +22,7 @@
             </a>
         </h1>
     </header>
-    <main>
+    <main class="flex-grow flex flex-col">
         <section>
             <p><span data-ruler>snake game with cURL</span></p>
             <p class="min-h-[1.5rem]"></p>
@@ -50,6 +50,10 @@
                 </button>
             </div>
             <p class="min-h-[1.5rem]"></p>
+        </section>
+
+        <section class="flex-grow flex justify-center items-center">
+            <pre data-game-grid class="text-center"></pre>
         </section>
     </main>
 </body>

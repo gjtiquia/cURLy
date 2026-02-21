@@ -19,7 +19,8 @@ func main() {
 
 	// testing notify
 	for i := 0; i < termSize.X; i++ {
-		canvas.SetCell(vector2.New(i, 1), byte('x'))
+		canvas.SetCell(vector2.New(i, 0), byte('x'))
+		canvas.SetCell(vector2.New(termSize.X-1-i, termSize.Y-1), byte('x'))
 		Notify(CanvasUpdated)
 
 		time.Sleep(1 * time.Second)

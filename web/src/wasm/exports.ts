@@ -25,19 +25,19 @@ export function createExports(size: Vector2) {
             // ptr returns the address of the Go slice header, not the byte data.
             // Slice header is [ptr: 4 bytes, len: 4 bytes, cap: 4 bytes].
             const slicePtr = wasm.exports.getCanvasCellsPtr();
-            const sliceDataView = new DataView(
+            const sliceHeader = new Uint32Array(
                 wasm.exports.memory.buffer,
                 slicePtr,
-                4 + 4 + 4,
+                3,
             );
 
-            // true = little-endian, the least significant byte is stored first, which Go's runtime uses
-            const ptr = sliceDataView.getUint32(0, true);
-            const len = sliceDataView.getUint32(0 + 4, true);
-            const cap = sliceDataView.getUint32(0 + 4 + 4, true);
+            const ptr = sliceHeader[0];
+            const len = sliceHeader[1];
+            const cap = sliceHeader[2];
 
             let text = "";
             for (let y = 0; y < size.Y; y++) {
+                // []byte in Go
                 const rowBytes = new Uint8Array(
                     wasm.exports.memory.buffer,
                     ptr + y * size.X,

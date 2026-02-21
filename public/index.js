@@ -56,10 +56,10 @@ function createExports(size) {
       if (!wasm)
         return;
       const slicePtr = wasm.exports.getCanvasCellsPtr();
-      const sliceDataView = new DataView(wasm.exports.memory.buffer, slicePtr, 4 + 4 + 4);
-      const ptr = sliceDataView.getUint32(0, true);
-      const len = sliceDataView.getUint32(0 + 4, true);
-      const cap = sliceDataView.getUint32(0 + 4 + 4, true);
+      const sliceHeader = new Uint32Array(wasm.exports.memory.buffer, slicePtr, 3);
+      const ptr = sliceHeader[0];
+      const len = sliceHeader[1];
+      const cap = sliceHeader[2];
       let text = "";
       for (let y = 0;y < size.Y; y++) {
         const rowBytes = new Uint8Array(wasm.exports.memory.buffer, ptr + y * size.X, size.X);

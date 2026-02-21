@@ -8,6 +8,7 @@ import (
 )
 
 var canvas Canvas
+var inputCh chan byte
 
 func main() {
 	defer Notify(MainExit)
@@ -16,9 +17,22 @@ func main() {
 	fmt.Println("termSize", termSize)
 
 	canvas = CreateCanvas(termSize, ' ')
+	inputCh = make(chan byte, 8)
 
-	// testing notify
+	inputBuffer := make([]byte, 0, 8)
+
 	for i := 0; i < termSize.X; i++ {
+		inputBuffer = inputBuffer[:0]
+	drain:
+		for {
+			select {
+			case input := <-inputCh:
+				inputBuffer = append(inputBuffer, input)
+			default:
+				break drain
+			}
+		}
+
 		canvas.SetCell(vector2.New(i, 0), byte('x'))
 		canvas.SetCell(vector2.New(termSize.X-1-i, termSize.Y-1), byte('x'))
 		Notify(CanvasUpdated)

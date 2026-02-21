@@ -1,4 +1,5 @@
 import { Vector2 } from "../vector2";
+import { subscribeToKeyDownEvent } from "./input";
 
 let gridElement: HTMLElement | undefined = undefined;
 
@@ -7,6 +8,9 @@ export function init(): { ok: boolean; error?: string } {
     if (!el) return { ok: false, error: "cannot find [data-game-grid]!" };
 
     gridElement = el as HTMLElement;
+
+    subscribeToKeyDownEvent();
+
     return { ok: true };
 }
 

@@ -8,3 +8,10 @@ package main
 func getCanvasCellsPtr() *[]byte {
 	return &canvas.cells
 }
+
+//export onInputAction
+func onInputAction(id byte) {
+	if inputCh != nil {
+		inputCh <- id
+	}
+}

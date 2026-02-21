@@ -41,27 +41,6 @@ function getMaxCharPerLine() {
   return maxCharCount;
 }
 
-// web/src/game/index.ts
-var gridElement = undefined;
-function init2() {
-  const el = document.body.querySelector("[data-game-grid]");
-  if (!el)
-    return { ok: false, error: "cannot find [data-game-grid]!" };
-  gridElement = el;
-  return { ok: true };
-}
-function getSize() {
-  const size = { X: 32, Y: 12 };
-  return size;
-}
-function setText(text) {
-  if (!gridElement) {
-    console.error("game: gridElement undefined!");
-    return;
-  }
-  gridElement.innerHTML = text;
-}
-
 // web/src/wasm/exports.ts
 var textDecoder = new TextDecoder;
 function createExports(size) {
@@ -114,6 +93,80 @@ async function initAsync(size) {
     console.error("wasm.initAsync: error");
     console.error(err);
   }
+}
+
+// web/src/game/input.ts
+function subscribeToKeyDownEvent() {
+  document.addEventListener("keydown", (e) => {
+    const action = mapCodeToInputAction(e.code);
+    const actionId = getInputActionId(action);
+    if (wasm && action != "none") {
+      console.log("js actionId", actionId);
+      wasm.exports.onInputAction(actionId);
+    }
+  });
+}
+function mapCodeToInputAction(code) {
+  switch (code) {
+    case "KeyW":
+    case "ArrowUp":
+    case "KeyK":
+      return "up";
+    case "KeyS":
+    case "ArrowDown":
+    case "KeyJ":
+      return "down";
+    case "KeyA":
+    case "ArrowLeft":
+    case "KeyH":
+      return "left";
+    case "KeyD":
+    case "ArrowRight":
+    case "KeyL":
+      return "right";
+    case "KeyR":
+      return "restart";
+    default:
+      return "none";
+  }
+}
+function getInputActionId(action) {
+  switch (action) {
+    case "up":
+      return 1;
+    case "down":
+      return 2;
+    case "left":
+      return 3;
+    case "right":
+      return 4;
+    case "restart":
+      return 5;
+    case "none":
+      return 0;
+  }
+}
+
+// web/src/game/index.ts
+var gridElement = undefined;
+function init2() {
+  const el = document.body.querySelector("[data-game-grid]");
+  if (!el)
+    return { ok: false, error: "cannot find [data-game-grid]!" };
+  gridElement = el;
+  subscribeToKeyDownEvent();
+  return { ok: true };
+}
+function getSize() {
+  const size = { X: 32, Y: 12 };
+  return size;
+}
+function setText(text) {
+  if (!gridElement) {
+    console.error("game: gridElement undefined!");
+    return;
+  }
+  gridElement.innerHTML = text;
 }
 // web/src/index.ts
 async function initAsync2() {

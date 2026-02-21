@@ -42,7 +42,7 @@ bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
 bun build ./web/src/index.ts --outdir=./public
 
 # build wasm
-GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./cmd/wasm
+GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./web/wasm
 
 # build web server
 go build -o ./bin/server ./cmd/server

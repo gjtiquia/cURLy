@@ -60,14 +60,14 @@ function createExports(size) {
       const ptr = sliceDataView.getUint32(0, true);
       const len = sliceDataView.getUint32(0 + 4, true);
       const cap = sliceDataView.getUint32(0 + 4 + 4, true);
-      let out = "";
+      let text = "";
       for (let y = 0;y < size.Y; y++) {
         const rowBytes = new Uint8Array(wasm.exports.memory.buffer, ptr + y * size.X, size.X);
-        out += textDecoder.decode(rowBytes);
-        out += `
+        text += textDecoder.decode(rowBytes);
+        text += `
 `;
       }
-      setText(out);
+      setText(text);
     }
   };
 }
@@ -101,7 +101,6 @@ function subscribeToKeyDownEvent() {
     const action = mapCodeToInputAction(e.code);
     const actionId = getInputActionId(action);
     if (wasm && action != "none") {
-      console.log("js actionId", actionId);
       wasm.exports.onInputAction(actionId);
     }
   });

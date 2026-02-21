@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gjtiquia/cURLy/internal/game/canvas"
 	"github.com/gjtiquia/cURLy/internal/vector2"
 )
 
-var canvas Canvas
+var canvasInstance canvas.Type
 var inputCh chan byte
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	termSize := GetTermSize()
 	fmt.Println("termSize", termSize)
 
-	canvas = CreateCanvas(termSize, ' ')
+	canvasInstance = canvas.Create(termSize)
 	inputCh = make(chan byte, 8)
 
 	inputBuffer := make([]byte, 0, 8)
@@ -33,8 +34,8 @@ func main() {
 			}
 		}
 
-		canvas.SetCell(vector2.New(i, 0), byte('x'))
-		canvas.SetCell(vector2.New(termSize.X-1-i, termSize.Y-1), byte('x'))
+		canvasInstance.SetCell(vector2.New(i, 0), canvas.CellTypeSnakeBody)
+		canvasInstance.SetCell(vector2.New(termSize.X-1-i, termSize.Y-1), canvas.CellTypeSnakeBody)
 		Notify(CanvasUpdated)
 
 		time.Sleep(1 * time.Second)
@@ -47,20 +48,3 @@ const (
 	MainExit NotifyEvent = iota
 	CanvasUpdated
 )
-
-type Canvas struct {
-	size  vector2.Type
-	cells []byte
-}
-
-func CreateCanvas(size vector2.Type, defaultCell byte) Canvas {
-	cells := make([]byte, size.Y*size.X)
-	for i := range cells {
-		cells[i] = defaultCell
-	}
-	return Canvas{size, cells}
-}
-
-func (this *Canvas) SetCell(pos vector2.Type, value byte) {
-	this.cells[pos.Y*this.size.X+pos.X] = value
-}

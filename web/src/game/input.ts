@@ -8,7 +8,7 @@ export function subscribeToKeyDownEvent() {
         const actionId = getInputActionId(action);
 
         if (wasm && action != "none") {
-            console.log("js actionId", actionId);
+            // console.log("js actionId", actionId);
             wasm.exports.onInputAction(actionId);
         }
     });

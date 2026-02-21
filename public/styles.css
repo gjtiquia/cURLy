@@ -210,6 +210,12 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-stone-50\/25 {
+    border-color: color-mix(in srgb, oklch(98.5% 0.001 106.423) 25%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-stone-50) 25%, transparent);
+    }
+  }
   .bg-stone-900 {
     background-color: var(--color-stone-900);
   }

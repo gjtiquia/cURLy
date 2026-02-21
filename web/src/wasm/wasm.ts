@@ -21,7 +21,6 @@ export async function initAsync(size: Vector2) {
     const go = new Go();
 
     // import functions for main.wasm to use
-    // TinyGo passes string args as (ptr, len) into linear memory, not as JS strings.
     go.importObject.env = createExports(size);
 
     // polyfill if browsers do not support WebAssembly.instantiateStreaming
@@ -45,6 +44,7 @@ export async function initAsync(size: Vector2) {
         const exitCode = await go.run(wasm); // runs main()
         console.log("main.wasm exit code:", exitCode);
     } catch (err) {
+        console.error("wasm.initAsync: error");
         console.error(err);
     }
 }

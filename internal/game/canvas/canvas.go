@@ -1,7 +1,8 @@
 package canvas
 
-import "github.com/gjtiquia/cURLy/internal/vector2"
-import "github.com/gjtiquia/cURLy/internal/game"
+import (
+	"github.com/gjtiquia/cURLy/internal/vector2"
+)
 
 type Canvas struct {
 	Size vector2.Type
@@ -41,23 +42,27 @@ func (this *Canvas) SetCellByXY(x, y int, cellType CellType) {
 	this.Cells[y*this.Size.X+x] = cellType
 }
 
-func CreateCanvas(config game.Config) Canvas {
-	canvas := CreateEmptyCanvas(config.TermSize)
+func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) {
+	this.Cells[y*this.Size.X+x] = CellType(rawByte)
+}
+
+func CreateCanvas(termSize, canvasSize, padding, borderThickness vector2.Type) Canvas {
+	canvas := CreateEmptyCanvas(termSize)
 
 	// Define regions (all coordinates are in terminal space, 0-indexed from top-left)
 	// Border surrounds the canvas, padding surrounds the border
-	borderLeft := config.Padding.X - config.BorderThickness.X
-	borderRight := config.Padding.X + config.CanvasSize.X // exclusive for canvas, inclusive for border
-	borderTop := config.Padding.Y - config.BorderThickness.Y
-	borderBottom := config.Padding.Y + config.CanvasSize.Y // exclusive for canvas, inclusive for border
+	borderLeft := padding.X - borderThickness.X
+	borderRight := padding.X + canvasSize.X // exclusive for canvas, inclusive for border
+	borderTop := padding.Y - borderThickness.Y
+	borderBottom := padding.Y + canvasSize.Y // exclusive for canvas, inclusive for border
 
-	canvasLeft := config.Padding.X
-	canvasRight := config.Padding.X + config.CanvasSize.X // exclusive
-	canvasTop := config.Padding.Y
-	canvasBottom := config.Padding.Y + config.CanvasSize.Y // exclusive
+	canvasLeft := padding.X
+	canvasRight := padding.X + canvasSize.X // exclusive
+	canvasTop := padding.Y
+	canvasBottom := padding.Y + canvasSize.Y // exclusive
 
-	for y := 0; y < config.TermSize.Y; y++ {
-		for x := 0; x < config.TermSize.X; x++ {
+	for y := 0; y < termSize.Y; y++ {
+		for x := 0; x < termSize.X; x++ {
 			// Check if in canvas region
 			if x >= canvasLeft && x < canvasRight && y >= canvasTop && y < canvasBottom {
 				canvas.SetCellByXY(x, y, CellTypeBg)
@@ -65,11 +70,11 @@ func CreateCanvas(config game.Config) Canvas {
 			}
 
 			// Check if in border region (horizontal borders - top and bottom)
-			if y >= borderTop && y < canvasTop && x >= borderLeft && x < borderRight+config.BorderThickness.X {
+			if y >= borderTop && y < canvasTop && x >= borderLeft && x < borderRight+borderThickness.X {
 				canvas.SetCellByXY(x, y, CellTypeBorderX)
 				continue
 			}
-			if y >= canvasBottom && y < borderBottom+config.BorderThickness.Y && x >= borderLeft && x < borderRight+config.BorderThickness.X {
+			if y >= canvasBottom && y < borderBottom+borderThickness.Y && x >= borderLeft && x < borderRight+borderThickness.X {
 				canvas.SetCellByXY(x, y, CellTypeBorderX)
 				continue
 			}
@@ -80,7 +85,7 @@ func CreateCanvas(config game.Config) Canvas {
 					canvas.SetCellByXY(x, y, CellTypeBorderY)
 					continue
 				}
-				if x >= canvasRight && x < canvasRight+config.BorderThickness.X {
+				if x >= canvasRight && x < canvasRight+borderThickness.X {
 					canvas.SetCellByXY(x, y, CellTypeBorderY)
 					continue
 				}
@@ -92,4 +97,43 @@ func CreateCanvas(config game.Config) Canvas {
 	}
 
 	return canvas
+}
+
+func (this *Canvas) DrawTitle(title string, padding, borderThickness, termSize vector2.Type) {
+	x := padding.X - borderThickness.X
+	y := padding.Y - borderThickness.Y - 1
+
+	for i, char := range title {
+		if x+i > termSize.X {
+			break
+		}
+
+		this.SetCellByXYRaw(x+i, y, byte(char))
+	}
+}
+
+func (this *Canvas) DrawMessage(message string, padding, borderThickness, termSize, canvasSize vector2.Type) {
+	x := padding.X - borderThickness.X
+	y := padding.Y + canvasSize.Y + borderThickness.Y
+
+	for i, char := range message {
+		if x+i >= termSize.X {
+			break
+		}
+
+		this.SetCellByXYRaw(x+i, y, byte(char))
+	}
+}
+
+func (this *Canvas) DrawFooter(message string, padding, borderThickness, termSize, canvasSize vector2.Type) {
+	x := padding.X - borderThickness.X
+	y := padding.Y + canvasSize.Y + borderThickness.Y + 1
+
+	for i, char := range message {
+		if x+i >= termSize.X {
+			break
+		}
+
+		this.SetCellByXYRaw(x+i, y, byte(char))
+	}
 }

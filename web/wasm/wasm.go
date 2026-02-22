@@ -16,8 +16,8 @@ func main() {
 
 	termSize := JS_GetTermSize()
 
-	gameConfig := game.CreateConfig(termSize)
-	canvasInstance = canvas.CreateCanvas(gameConfig)
+	config := game.CreateConfig(termSize)
+	canvasInstance = canvas.CreateCanvas(config.TermSize, config.CanvasSize, config.Padding, config.BorderThickness)
 
 	inputCh = make(chan input.Action, 8)
 	inputBuffer := input.CreateBuffer()

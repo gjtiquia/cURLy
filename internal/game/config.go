@@ -8,20 +8,20 @@ import (
 	"github.com/gjtiquia/cURLy/internal/vector2"
 )
 
-type GameConfig struct {
-	FPS        int
-	DELTA_TIME time.Duration
+type Config struct {
+	FPS       int
+	DeltaTime time.Duration
 
-	TERM_SIZE        vector2.Type
-	BORDER_THICKNESS vector2.Type
-	CANVAS_SIZE      vector2.Type
-	PADDING          vector2.Type
+	TermSize        vector2.Type
+	BorderThickness vector2.Type
+	CanvasSize      vector2.Type
+	Padding         vector2.Type
 
-	TITLE  string
-	FOOTER string
+	Title  string
+	Footer string
 }
 
-func createGameConfig(termSize vector2.Type) GameConfig {
+func CreateConfig(termSize vector2.Type) Config {
 	FPS := 8
 
 	CANVAS_SIZE := vector2.New(20, 8)
@@ -39,16 +39,16 @@ func createGameConfig(termSize vector2.Type) GameConfig {
 	log.Printf("padding: %vx%v", paddingX, paddingY)
 	log.Printf("canvas: %vx%v", CANVAS_SIZE.X, CANVAS_SIZE.Y)
 
-	return GameConfig{
-		FPS:        FPS,
-		DELTA_TIME: time.Duration(int(math.Round(float64(1000)/float64(FPS))) * int(time.Millisecond)),
+	return Config{
+		FPS:       FPS,
+		DeltaTime: time.Duration(int(math.Round(float64(1000)/float64(FPS))) * int(time.Millisecond)),
 
-		CANVAS_SIZE:      CANVAS_SIZE,
-		BORDER_THICKNESS: BORDER_THICKNESS,
-		TERM_SIZE:        vector2.New(termSize.X, termSize.Y),
-		PADDING:          vector2.New(paddingX, paddingY),
+		CanvasSize:      CANVAS_SIZE,
+		BorderThickness: BORDER_THICKNESS,
+		TermSize:        vector2.New(termSize.X, termSize.Y),
+		Padding:         vector2.New(paddingX, paddingY),
 
-		TITLE:  "cURLy.gjt.io",
-		FOOTER: "Move: WASD; Restart: R",
+		Title:  "cURLy.gjt.io",
+		Footer: "Move: WASD; Restart: R",
 	}
 }

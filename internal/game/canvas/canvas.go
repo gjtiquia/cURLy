@@ -36,6 +36,7 @@ func CreateEmptyCanvas(size vector2.Type) Canvas {
 	return Canvas{size, cells}
 }
 
+// TODO : some use canvas size so this should translate to canvas size.......
 func (this *Canvas) SetCellByPos(pos vector2.Type, cellType CellType) {
 	this.SetCellByXY(pos.X, pos.Y, cellType)
 }

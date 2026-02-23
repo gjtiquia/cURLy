@@ -36,9 +36,18 @@ func CreateEmptyCanvas(size vector2.Type) Canvas {
 	return Canvas{size, cells}
 }
 
-// TODO : some use canvas size so this should translate to canvas size.......
-func (this *Canvas) SetCellByPos(pos vector2.Type, cellType CellType) {
-	this.SetCellByXY(pos.X, pos.Y, cellType)
+func (this *Canvas) SetCellByCanvasPos(canvasPos vector2.Type, cellType CellType, padding, canvasSize vector2.Type) {
+	this.SetCellByCanvasXY(canvasPos.X, canvasPos.Y, cellType, padding, canvasSize)
+}
+
+func (this *Canvas) SetCellByCanvasXY(x, y int, cellType CellType, padding, canvasSize vector2.Type) {
+	// canvas is drawn from top to bottom but game coordinates is from bottom to top
+	// game y=0 is at bottom of canvas, which maps to terminal row: PADDING.y + CANVAS_SIZE.y - 1
+	// game y=CANVAS_SIZE.y-1 is at top, which maps to terminal row: PADDING.y
+	termY := padding.Y + (canvasSize.Y - 1 - y)
+	termX := padding.X + x
+
+	this.SetCellByXY(termX, termY, cellType)
 }
 
 func (this *Canvas) SetCellByXY(x, y int, cellType CellType) error {
@@ -66,7 +75,7 @@ func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) error {
 func (this *Canvas) ResetCanvas(termSize, canvasSize, padding, borderThickness vector2.Type) {
 	for y := 0; y < canvasSize.Y; y++ {
 		for x := 0; x < canvasSize.X; x++ {
-			this.SetCellByXY(x, y, CellTypeBg)
+			this.SetCellByCanvasXY(x, y, CellTypeBg, padding, canvasSize)
 		}
 	}
 

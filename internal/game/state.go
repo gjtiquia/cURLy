@@ -177,13 +177,13 @@ func (this *GameState) checkWin(canvasSize vector2.Type) bool {
 func (this *GameState) OnDraw(config Config, c canvas.Type) {
 	// note: order matters, affects what overlaps what
 
-	c.SetCellByPos(this.foodPos, canvas.CellTypeFood)
+	c.SetCellByCanvasPos(this.foodPos, canvas.CellTypeFood, config.Padding, config.CanvasSize)
 
 	for _, pos := range this.snakeBodyPosList {
-		c.SetCellByPos(pos, canvas.CellTypeSnakeBody)
+		c.SetCellByCanvasPos(pos, canvas.CellTypeSnakeBody, config.Padding, config.CanvasSize)
 	}
 
-	c.SetCellByPos(this.snakeHeadPos, canvas.CellTypeSnakeHead)
+	c.SetCellByCanvasPos(this.snakeHeadPos, canvas.CellTypeSnakeHead, config.Padding, config.CanvasSize)
 
 	switch this.playState {
 	case GamePlaying:

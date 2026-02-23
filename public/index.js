@@ -157,7 +157,7 @@ function init2() {
   return { ok: true };
 }
 function getSize() {
-  const size = { X: 32, Y: 12 };
+  const size = { X: 32, Y: 14 };
   return size;
 }
 function setText(text) {

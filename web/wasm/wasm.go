@@ -14,17 +14,17 @@ var inputCh chan input.Action
 func main() {
 	defer JS_Notify(MainExit)
 
+	// TODO : fix the panic somewhere, should log it with the stacktrace
+
 	termSize := JS_GetTermSize()
 
-	// TODO : use game.Create and game.RunLoop
+	config, gameState, c, inputBuffer := game.Create(termSize)
 
-	config := game.CreateConfig(termSize)
-	canvasInstance = canvas.CreateCanvas(config.TermSize, config.CanvasSize, config.Padding, config.BorderThickness)
-
+	// globals
+	canvasInstance = c
 	inputCh = make(chan input.Action, 8)
-	inputBuffer := input.CreateBuffer()
 
-	for i := 0; i < termSize.X; i++ {
+	for {
 		inputBuffer = inputBuffer[:0]
 	drain:
 		for {
@@ -36,8 +36,11 @@ func main() {
 			}
 		}
 
+		game.RunLoop(config, gameState, c, inputBuffer)
+
 		JS_Notify(CanvasUpdated)
 
+		// TODO : delta time
 		time.Sleep(1 * time.Second)
 	}
 }

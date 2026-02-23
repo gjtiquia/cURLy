@@ -1,6 +1,8 @@
 package canvas
 
 import (
+	"fmt"
+
 	"github.com/gjtiquia/cURLy/internal/vector2"
 )
 
@@ -38,12 +40,24 @@ func (this *Canvas) SetCellByPos(pos vector2.Type, cellType CellType) {
 	this.SetCellByXY(pos.X, pos.Y, cellType)
 }
 
-func (this *Canvas) SetCellByXY(x, y int, cellType CellType) {
+func (this *Canvas) SetCellByXY(x, y int, cellType CellType) error {
+	index := y*this.Size.X + x
+	if index >= len(this.Cells) {
+		return fmt.Errorf("Canvas.SetCellByXYRaw: (%d, %d) greater than size %v!", x, y, this.Size)
+	}
+
 	this.Cells[y*this.Size.X+x] = cellType
+	return nil
 }
 
-func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) {
-	this.Cells[y*this.Size.X+x] = CellType(rawByte)
+func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) error {
+	index := y*this.Size.X + x
+	if index >= len(this.Cells) {
+		return fmt.Errorf("Canvas.SetCellByXYRaw: (%d, %d) greater than size %v!", x, y, this.Size)
+	}
+
+	this.Cells[index] = CellType(rawByte)
+	return nil
 }
 
 // TODO : kinda ugly, better accept interface instead?

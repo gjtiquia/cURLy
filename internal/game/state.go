@@ -195,7 +195,6 @@ func (this *GameState) OnDraw(config Config, c canvas.Type) {
 	default:
 		c.DrawMessage("", config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 	}
-
 }
 
 func (this *GameState) generateRandomFoodPos(canvasSize vector2.Type) (vector2.Type, error) {

@@ -140,7 +140,7 @@ func (this *GameState) OnUpdate(config Config, inputBuffer []input.Action) {
 	}
 
 	// move each body part forward (move the last one first!)
-	previousLastBodyPos := this.snakeHeadPos // fallback
+	previousLastBodyPos := previousSnakeHeadPos // fallback
 	if len(this.snakeBodyPosList) > 0 {
 		previousLastBodyPos = this.snakeBodyPosList[len(this.snakeBodyPosList)-1]
 		for i := len(this.snakeBodyPosList) - 1; i >= 0; i-- {

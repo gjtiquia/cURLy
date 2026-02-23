@@ -35,10 +35,6 @@ func CreateConfig(termSize vector2.Type) Config {
 	paddingX := int(math.Floor(float64(termSize.X-CANVAS_SIZE.X) / 2))
 	paddingY := int(math.Floor(float64(termSize.Y-CANVAS_SIZE.Y) / 2))
 
-	log.Printf("term size: %vx%v", termSize.X, termSize.Y)
-	log.Printf("padding: %vx%v", paddingX, paddingY)
-	log.Printf("canvas: %vx%v", CANVAS_SIZE.X, CANVAS_SIZE.Y)
-
 	return Config{
 		FPS:       FPS,
 		DeltaTime: time.Duration(int(math.Round(float64(1000)/float64(FPS))) * int(time.Millisecond)),

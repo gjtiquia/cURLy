@@ -37,7 +37,6 @@ func main() {
 		}
 
 		game.RunLoop(config, gameState, c, inputBuffer)
-
 		JS_Notify(CanvasUpdated)
 
 		elapsedTime := time.Since(startTime)

@@ -36,6 +36,10 @@ func CreateEmptyCanvas(size vector2.Type) Canvas {
 	return Canvas{size, cells}
 }
 
+func (this *Canvas) GetCellByXY(x, y int) CellType {
+	return this.Cells[y*this.Size.X+x]
+}
+
 func (this *Canvas) SetCellByXY(x, y int, cellType CellType) error {
 	index := y*this.Size.X + x
 	if index >= len(this.Cells) {

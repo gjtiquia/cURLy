@@ -3,6 +3,9 @@ package main
 import (
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
+	"github.com/gjtiquia/cURLy/internal/game/canvas"
+	"github.com/gjtiquia/cURLy/internal/game/input"
+	"github.com/gjtiquia/cURLy/internal/vector2"
 )
 
 func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
@@ -34,7 +37,7 @@ func InitTCellScreen() (s tcell.Screen, err error, finalizeScreen func()) {
 	return s, nil, finalizeScreen
 }
 
-func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) (buffer []InputAction, isExit bool) {
+func DrainTCellEvents(s tcell.Screen, inputBuffer input.Buffer) (buffer input.Buffer, isExit bool) {
 	inputBuffer = inputBuffer[:0]
 	for {
 		// Update screen
@@ -54,21 +57,21 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) (buffer []Input
 
 				if key == tcell.KeyEscape || key == tcell.KeyCtrlC {
 					inputBuffer = inputBuffer[:0]
-					inputBuffer = append(inputBuffer, Exit)
+					inputBuffer = append(inputBuffer, input.ActionExit)
 					return inputBuffer, true
 				}
 
 				switch {
 				case key == tcell.KeyUp, str == "w", str == "k":
-					inputBuffer = append(inputBuffer, Up)
+					inputBuffer = append(inputBuffer, input.ActionUp)
 				case key == tcell.KeyDown, str == "s", str == "j":
-					inputBuffer = append(inputBuffer, Down)
+					inputBuffer = append(inputBuffer, input.ActionDown)
 				case key == tcell.KeyLeft, str == "a", str == "h":
-					inputBuffer = append(inputBuffer, Left)
+					inputBuffer = append(inputBuffer, input.ActionLeft)
 				case key == tcell.KeyRight, str == "d", str == "l":
-					inputBuffer = append(inputBuffer, Right)
+					inputBuffer = append(inputBuffer, input.ActionRight)
 				case str == "r":
-					inputBuffer = append(inputBuffer, Restart)
+					inputBuffer = append(inputBuffer, input.ActionRestart)
 				}
 			}
 
@@ -77,4 +80,13 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer []InputAction) (buffer []Input
 			return inputBuffer, false
 		}
 	}
+}
+
+func RenderCanvas(s tcell.Screen, termSize vector2.Type, c canvas.Type) {
+	for y := range termSize.Y {
+		for x := range termSize.X {
+			s.PutStr(x, y, string(c.GetCellByXY(x, y)))
+		}
+	}
+	s.Show()
 }

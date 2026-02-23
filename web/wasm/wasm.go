@@ -16,6 +16,8 @@ func main() {
 
 	termSize := JS_GetTermSize()
 
+	// TODO : use game.Create and game.RunLoop
+
 	config := game.CreateConfig(termSize)
 	canvasInstance = canvas.CreateCanvas(config.TermSize, config.CanvasSize, config.Padding, config.BorderThickness)
 

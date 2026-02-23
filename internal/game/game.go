@@ -6,7 +6,7 @@ import (
 	"github.com/gjtiquia/cURLy/internal/vector2"
 )
 
-func CreateGame(termSize vector2.Type) (Config, *GameState, canvas.Type, input.Buffer) {
+func Create(termSize vector2.Type) (Config, *GameState, canvas.Type, input.Buffer) {
 	config := CreateConfig(termSize)
 	state := CreateGameState(config.CanvasSize)
 
@@ -14,13 +14,12 @@ func CreateGame(termSize vector2.Type) (Config, *GameState, canvas.Type, input.B
 	c.DrawTitle(config.Title, config.Padding, config.BorderThickness, config.TermSize)
 	c.DrawFooter(config.Footer, config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 
-	// arbitrary capacity of 4, players probably wont mash more than 4 keys between frames, if so the underlying array should adjust itself
 	inputBuffer := input.CreateBuffer()
 
 	return config, state, c, inputBuffer
 }
 
-func RunGameLoop(config Config, gameState *GameState, c canvas.Type, inputBuffer input.Buffer) {
+func RunLoop(config Config, gameState *GameState, c canvas.Type, inputBuffer input.Buffer) {
 	// game logic
 	gameState.OnUpdate(config, inputBuffer)
 

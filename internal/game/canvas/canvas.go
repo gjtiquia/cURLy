@@ -36,20 +36,6 @@ func CreateEmptyCanvas(size vector2.Type) Canvas {
 	return Canvas{size, cells}
 }
 
-func (this *Canvas) SetCellByCanvasPos(canvasPos vector2.Type, cellType CellType, padding, canvasSize vector2.Type) {
-	this.SetCellByCanvasXY(canvasPos.X, canvasPos.Y, cellType, padding, canvasSize)
-}
-
-func (this *Canvas) SetCellByCanvasXY(x, y int, cellType CellType, padding, canvasSize vector2.Type) {
-	// canvas is drawn from top to bottom but game coordinates is from bottom to top
-	// game y=0 is at bottom of canvas, which maps to terminal row: PADDING.y + CANVAS_SIZE.y - 1
-	// game y=CANVAS_SIZE.y-1 is at top, which maps to terminal row: PADDING.y
-	termY := padding.Y + (canvasSize.Y - 1 - y)
-	termX := padding.X + x
-
-	this.SetCellByXY(termX, termY, cellType)
-}
-
 func (this *Canvas) SetCellByXY(x, y int, cellType CellType) error {
 	index := y*this.Size.X + x
 	if index >= len(this.Cells) {
@@ -68,6 +54,20 @@ func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) error {
 
 	this.Cells[index] = CellType(rawByte)
 	return nil
+}
+
+func (this *Canvas) SetCellByCanvasPos(canvasPos vector2.Type, cellType CellType, padding, canvasSize vector2.Type) {
+	this.SetCellByCanvasXY(canvasPos.X, canvasPos.Y, cellType, padding, canvasSize)
+}
+
+func (this *Canvas) SetCellByCanvasXY(x, y int, cellType CellType, padding, canvasSize vector2.Type) {
+	// canvas is drawn from top to bottom but game coordinates is from bottom to top
+	// game y=0 is at bottom of canvas, which maps to terminal row: PADDING.y + CANVAS_SIZE.y - 1
+	// game y=CANVAS_SIZE.y-1 is at top, which maps to terminal row: PADDING.y
+	termY := padding.Y + (canvasSize.Y - 1 - y)
+	termX := padding.X + x
+
+	this.SetCellByXY(termX, termY, cellType)
 }
 
 // TODO : kinda ugly, better accept interface instead?

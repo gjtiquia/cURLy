@@ -14,17 +14,17 @@ var inputCh chan input.Action
 func main() {
 	defer JS_Notify(MainExit)
 
-	// TODO : fix the panic somewhere, should log it with the stacktrace
-
 	termSize := JS_GetTermSize()
-
 	config, gameState, c, inputBuffer := game.Create(termSize)
 
 	// globals
 	canvasInstance = c
 	inputCh = make(chan input.Action, 8)
 
+	// game loop
 	for {
+		startTime := time.Now()
+
 		inputBuffer = inputBuffer[:0]
 	drain:
 		for {
@@ -40,8 +40,11 @@ func main() {
 
 		JS_Notify(CanvasUpdated)
 
-		// TODO : delta time
-		time.Sleep(1 * time.Second)
+		elapsedTime := time.Since(startTime)
+		remainingTime := config.DeltaTime - elapsedTime
+		if remainingTime > 0 {
+			time.Sleep(remainingTime)
+		}
 	}
 }
 

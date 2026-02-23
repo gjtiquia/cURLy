@@ -46,6 +46,22 @@ func (this *Canvas) SetCellByXYRaw(x, y int, rawByte byte) {
 	this.Cells[y*this.Size.X+x] = CellType(rawByte)
 }
 
+// TODO : kinda ugly, better accept interface instead?
+
+func (this *Canvas) ResetCanvas(termSize, canvasSize, padding, borderThickness vector2.Type) {
+	for y := 0; y < canvasSize.Y; y++ {
+		for x := 0; x < canvasSize.X; x++ {
+			this.SetCellByXY(x, y, CellTypeBg)
+		}
+	}
+
+	// clear message
+	y := padding.Y + canvasSize.Y + borderThickness.Y
+	for x := padding.X; x < termSize.X; x++ {
+		this.SetCellByXY(x, y, CellTypePadding)
+	}
+}
+
 func CreateCanvas(termSize, canvasSize, padding, borderThickness vector2.Type) Canvas {
 	canvas := CreateEmptyCanvas(termSize)
 

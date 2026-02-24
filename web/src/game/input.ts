@@ -1,6 +1,14 @@
 import { wasm } from "../wasm/wasm";
 
-export type InputAction = "none" | "up" | "down" | "left" | "right" | "restart";
+export type InputAction =
+    | "none"
+    | "up"
+    | "down"
+    | "left"
+    | "right"
+    | "restart"
+    | "pause"
+    | "exit";
 
 export function subscribeToKeyDownEvent() {
     document.addEventListener("keydown", (e) => {
@@ -39,6 +47,9 @@ function mapCodeToInputAction(code: string): InputAction {
         case "KeyR":
             return "restart";
 
+        case "KeyP":
+            return "pause";
+
         default:
             return "none";
     }
@@ -56,6 +67,10 @@ export function getInputActionId(action: InputAction): number {
             return 4;
         case "restart":
             return 5;
+        case "pause":
+            return 6;
+        case "exit":
+            return 7;
         case "none":
             return 0;
     }

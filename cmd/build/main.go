@@ -16,10 +16,9 @@ const BUILD_FILE = "cURLy"
 func main() {
 	fmt.Println("building... dir:", BUILD_DIR)
 
-	rmCmd := exec.Command("rm", "-rf", "bin")
-	err := rmCmd.Run()
+	err := os.RemoveAll("bin")
 	if err != nil {
-		log.Panicf("rm -rf bin: %v\n", err)
+		log.Panicf("os.RemoveAll('bin'): %v\n", err)
 	}
 
 	listCmd := exec.Command("go", "tool", "dist", "list")

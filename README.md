@@ -2,6 +2,22 @@
 
 snake game with cURL
 
+```
+ cURLy.gjt.io          
+ ----------------------
+ |                    |
+ |                    |
+ |                    |
+ |             *      |
+ |                    |
+ |             0      |
+ |   o         o      |
+ |   ooooooooooo      |
+ ----------------------
+ Score: 130            
+ Move: WASD; Restart: R
+```
+
 ```bash
 # for Linux/Mac
 curl -fsSL cURLy.gjt.io/install.sh | bash

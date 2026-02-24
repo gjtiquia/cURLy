@@ -165,6 +165,8 @@ function mapCodeToInputAction(code) {
       return "right";
     case "KeyR":
       return "restart";
+    case "KeyP":
+      return "pause";
     default:
       return "none";
   }
@@ -181,6 +183,10 @@ function getInputActionId(action) {
       return 4;
     case "restart":
       return 5;
+    case "pause":
+      return 6;
+    case "exit":
+      return 7;
     case "none":
       return 0;
   }

@@ -15,6 +15,7 @@ type PlayState int
 
 const (
 	GamePlaying PlayState = iota
+	GamePaused
 	GameLost
 	GameWon
 )
@@ -82,6 +83,14 @@ func (this *GameState) OnUpdate(config Config, inputBuffer []input.Action) {
 		// `*this = *CreateGameState` means we override the struct fields in the original struct, keeping the same pointer address
 		*this = *CreateGameState(config.CanvasSize)
 		return
+	}
+
+	if slices.Contains(inputBuffer, input.ActionPause) {
+		if this.playState == GamePlaying {
+			this.playState = GamePaused
+		} else if this.playState == GamePaused {
+			this.playState = GamePlaying
+		}
 	}
 
 	if this.playState != GamePlaying {
@@ -186,14 +195,12 @@ func (this *GameState) OnDraw(config Config, c canvas.Type) {
 	c.SetCellByCanvasPos(this.snakeHeadPos, canvas.CellTypeSnakeHead, config.Padding, config.CanvasSize)
 
 	switch this.playState {
-	case GamePlaying:
-		c.DrawMessage(fmt.Sprintf("Score: %v", this.score), config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 	case GameLost:
 		c.DrawMessage(fmt.Sprintf("You Lost! Score: %v", this.score), config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 	case GameWon:
 		c.DrawMessage(fmt.Sprintf("You Won! Score: %v", this.score), config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 	default:
-		c.DrawMessage("", config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
+		c.DrawMessage(fmt.Sprintf("Score: %v", this.score), config.Padding, config.BorderThickness, config.TermSize, config.CanvasSize)
 	}
 }
 

@@ -72,6 +72,8 @@ func DrainTCellEvents(s tcell.Screen, inputBuffer input.Buffer) (buffer input.Bu
 					inputBuffer = append(inputBuffer, input.ActionRight)
 				case str == "r":
 					inputBuffer = append(inputBuffer, input.ActionRestart)
+				case str == "p":
+					inputBuffer = append(inputBuffer, input.ActionPause)
 				}
 			}
 

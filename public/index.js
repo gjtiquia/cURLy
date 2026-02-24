@@ -56,18 +56,26 @@ function init2() {
 }
 init2();
 
-// web/src/ruler.ts
-function getMaxCharPerLine() {
-  const ruler = document.body.querySelector("[data-ruler]");
-  if (!ruler) {
-    console.error("initAsync:", "cannot find [data-ruler]!", "returning 0...");
-    return 0;
+// web/src/game/index.ts
+var gridElement = undefined;
+function init3() {
+  const el = document.body.querySelector("[data-game-grid]");
+  if (!el)
+    return { ok: false, error: "cannot find [data-game-grid]!" };
+  gridElement = el;
+  subscribeToKeyDownEvent();
+  return { ok: true };
+}
+function getSize() {
+  const size = { X: 32, Y: 13 };
+  return size;
+}
+function setText(text) {
+  if (!gridElement) {
+    console.error("game: gridElement undefined!");
+    return;
   }
-  const rect = ruler.getBoundingClientRect();
-  const text = ruler.innerHTML;
-  const charWidth = rect.width / text.length;
-  const maxCharCount = window.innerWidth / charWidth;
-  return maxCharCount;
+  gridElement.innerHTML = text;
 }
 
 // web/src/wasm/exports.ts
@@ -175,26 +183,33 @@ function getInputActionId(action) {
   }
 }
 
-// web/src/game/index.ts
-var gridElement = undefined;
-function init3() {
-  const el = document.body.querySelector("[data-game-grid]");
-  if (!el)
-    return { ok: false, error: "cannot find [data-game-grid]!" };
-  gridElement = el;
-  subscribeToKeyDownEvent();
-  return { ok: true };
+// web/src/touch-button.ts
+function init4() {
+  document.body.addEventListener("touchstart", async (event) => {
+    const button = event.target;
+    if (!button.matches("[data-touch-button]"))
+      return;
+    const action = button.getAttribute("data-touch-button");
+    const actionId = getInputActionId(action);
+    if (wasm && action != "none") {
+      wasm.exports.onInputAction(actionId);
+    }
+  });
 }
-function getSize() {
-  const size = { X: 32, Y: 13 };
-  return size;
-}
-function setText(text) {
-  if (!gridElement) {
-    console.error("game: gridElement undefined!");
-    return;
+init4();
+
+// web/src/ruler.ts
+function getMaxCharPerLine() {
+  const ruler = document.body.querySelector("[data-ruler]");
+  if (!ruler) {
+    console.error("initAsync:", "cannot find [data-ruler]!", "returning 0...");
+    return 0;
   }
-  gridElement.innerHTML = text;
+  const rect = ruler.getBoundingClientRect();
+  const text = ruler.innerHTML;
+  const charWidth = rect.width / text.length;
+  const maxCharCount = window.innerWidth / charWidth;
+  return maxCharCount;
 }
 // web/src/index.ts
 async function initAsync2() {

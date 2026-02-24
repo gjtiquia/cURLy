@@ -2,6 +2,7 @@
 // empty imports mean it will still be part of bundle while not having any conflicts
 import {} from "./copy-button";
 import {} from "./toggle-touch-controls";
+import {} from "./touch-button";
 import { getMaxCharPerLine } from "./ruler";
 import { type Vector2 } from "./vector2";
 import * as game from "./game";

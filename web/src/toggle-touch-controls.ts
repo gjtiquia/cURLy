@@ -28,6 +28,11 @@ export function init() {
                 el.classList.add("hidden");
             }
         }
+
+        // Check if API is supported
+        if ("vibrate" in navigator) {
+            navigator.vibrate(50); // ms
+        }
     });
 }
 

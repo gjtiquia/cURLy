@@ -52,6 +52,9 @@ function init2() {
         el.classList.add("hidden");
       }
     }
+    if ("vibrate" in navigator) {
+      navigator.vibrate(50);
+    }
   });
 }
 init2();
@@ -192,6 +195,9 @@ function init4() {
     const action = button.getAttribute("data-touch-button");
     const actionId = getInputActionId(action);
     if (wasm && action != "none") {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(50);
+      }
       wasm.exports.onInputAction(actionId);
     }
   });

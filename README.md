@@ -16,6 +16,7 @@ powershell -c "irm curly.gjt.io/install.ps1 | iex"
 - [TinyGo](https://tinygo.org/getting-started/install/)
 - [Air](https://github.com/air-verse/air?tab=readme-ov-file#installation)
 - [Bun](https://bun.sh/)
+- [make](https://en.wikipedia.org/wiki/Make_(software))
 
 ## tasks
 
@@ -24,7 +25,7 @@ powershell -c "irm curly.gjt.io/install.ps1 | iex"
 go run ./cmd/tui
 
 # build cURLy tui executables
-go run ./cmd/build
+make build/tui
 ```
 
 ```bash
@@ -35,17 +36,8 @@ bun install
 # also generates tailwind classes, bundles typescript, builds wasm
 air
 
-# build tailwind classes
-bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css
-
-# bundle TypeScript scripts
-bun build ./web/src/index.ts --outdir=./public
-
-# build wasm
-GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./web/wasm
-
 # build web server
-go build -o ./bin/server ./cmd/server
+make build/server
 
 # run web server on specific port
 PORT=4321 ./bin/server

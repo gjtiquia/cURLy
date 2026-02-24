@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -18,15 +19,13 @@ func main() {
 	rmCmd := exec.Command("rm", "-rf", "bin")
 	err := rmCmd.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rm -rf bin: %v\n", err)
-		os.Exit(1)
+		log.Panicf("rm -rf bin: %v\n", err)
 	}
 
 	listCmd := exec.Command("go", "tool", "dist", "list")
 	bytes, err := listCmd.Output()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "go tool dist list: %v\n", err)
-		os.Exit(1)
+		log.Panicf("go tool dist list: %v\n", err)
 	}
 
 	listOutputStr := string(bytes)

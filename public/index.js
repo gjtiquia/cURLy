@@ -53,7 +53,7 @@ function init2() {
       }
     }
     if ("vibrate" in navigator) {
-      navigator.vibrate(50);
+      navigator.vibrate(20);
     }
   });
 }
@@ -196,7 +196,7 @@ function init4() {
     const actionId = getInputActionId(action);
     if (wasm && action != "none") {
       if ("vibrate" in navigator) {
-        navigator.vibrate(50);
+        navigator.vibrate(20);
       }
       wasm.exports.onInputAction(actionId);
     }

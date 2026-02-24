@@ -12,7 +12,7 @@ export function init() {
         if (wasm && action != "none") {
             // Check if API is supported
             if ("vibrate" in navigator) {
-                navigator.vibrate(50); // ms
+                navigator.vibrate(20); // ms
             }
 
             wasm.exports.onInputAction(actionId);

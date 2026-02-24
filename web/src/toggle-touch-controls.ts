@@ -31,7 +31,7 @@ export function init() {
 
         // Check if API is supported
         if ("vibrate" in navigator) {
-            navigator.vibrate(50); // ms
+            navigator.vibrate(20); // ms
         }
     });
 }

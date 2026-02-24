@@ -25,7 +25,7 @@
     <main class="flex-grow flex flex-col">
         <section>
             <p><span data-ruler>snake game with cURL</span></p>
-            <p class="min-h-[1.5rem]"></p>
+            <p data-hide-on-touch class="min-h-[1.5rem]"></p>
         </section>
 
         <section data-hide-on-touch>
@@ -59,24 +59,34 @@
                 <pre data-game-grid>loading...</pre>
             </div>
             <div data-show-on-touch class="hidden">
-                <div class="flex flex-col items-center gap-4 pb-4">
-                    <div>
+                <div class="flex flex-col items-center gap-4 pb-8">
+                    <div class="flex gap-4 justify-end">
+                        <div class="px-8 py-6">
+                            <pre> </pre>
+                        </div>
                         <div data-touch-button="up"
                             class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
                             w
                         </div>
+                        <div class="px-8 py-6 relative">
+                            <pre> </pre>
+                            <div data-touch-button="restart"
+                                class="absolute top-0 right-0 cursor-pointer px-4 py-2 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                                r
+                            </div>
+                        </div>
                     </div>
                     <div class="flex gap-4">
                         <div data-touch-button="left"
-                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 active:text-stone-50/50 border-1 rounded-sm">
                             a
                         </div>
                         <div data-touch-button="down"
-                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 active:text-stone-50/50 border-1 rounded-sm">
                             s
                         </div>
                         <div data-touch-button="right"
-                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 active:text-stone-50/50 border-1 rounded-sm">
                             d
                         </div>
                     </div>

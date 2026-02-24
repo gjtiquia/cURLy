@@ -42,6 +42,3 @@ make build/server
 # run web server on specific port
 PORT=4321 ./bin/server
 ```
-
-## todos
-- [ ] Makefile with build command, including TypeScript typecheck, and minified outputs

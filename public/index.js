@@ -27,6 +27,35 @@ function init() {
 }
 init();
 
+// web/src/toggle-touch-controls.ts
+function init2() {
+  document.body.addEventListener("click", async (event) => {
+    const button = event.target;
+    if (!button.matches("[data-toggle-touch-controls]"))
+      return;
+    const touchControls = document.body.querySelector("[data-show-on-touch]");
+    if (!touchControls)
+      return;
+    const isHidden = touchControls.classList.contains("hidden");
+    if (isHidden) {
+      touchControls.classList.remove("hidden");
+      button.innerText = "Hide Touch Controls";
+    } else {
+      touchControls.classList.add("hidden");
+      button.innerText = "Show Touch Controls";
+    }
+    const elementsToHide = document.body.querySelectorAll("[data-hide-on-touch]");
+    for (let el of elementsToHide) {
+      if (!isHidden && el.classList.contains("hidden")) {
+        el.classList.remove("hidden");
+      } else if (!el.classList.contains("hidden")) {
+        el.classList.add("hidden");
+      }
+    }
+  });
+}
+init2();
+
 // web/src/ruler.ts
 function getMaxCharPerLine() {
   const ruler = document.body.querySelector("[data-ruler]");
@@ -148,7 +177,7 @@ function getInputActionId(action) {
 
 // web/src/game/index.ts
 var gridElement = undefined;
-function init2() {
+function init3() {
   const el = document.body.querySelector("[data-game-grid]");
   if (!el)
     return { ok: false, error: "cannot find [data-game-grid]!" };
@@ -157,7 +186,7 @@ function init2() {
   return { ok: true };
 }
 function getSize() {
-  const size = { X: 32, Y: 14 };
+  const size = { X: 32, Y: 13 };
   return size;
 }
 function setText(text) {
@@ -169,7 +198,7 @@ function setText(text) {
 }
 // web/src/index.ts
 async function initAsync2() {
-  const { ok, error } = init2();
+  const { ok, error } = init3();
   if (!ok) {
     console.error("initAsync:", error);
     return;

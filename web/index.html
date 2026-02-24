@@ -28,7 +28,7 @@
             <p class="min-h-[1.5rem]"></p>
         </section>
 
-        <section>
+        <section data-hide-on-touch>
             <h2 class="font-bold">## Linux & macOS</h2>
             <div>
                 <span>$ <code>curl -fsSL cURLy.gjt.io/install.sh | bash</code></span>
@@ -40,7 +40,7 @@
             <p class="min-h-[1.5rem]"></p>
         </section>
 
-        <section>
+        <section data-hide-on-touch>
             <h2 class="font-bold">## Windows</h2>
             <div>
                 <span>$ <code>powershell -c "irm curly.gjt.io/install.ps1 | iex"</code></span>
@@ -58,6 +58,34 @@
             <div class="flex-grow flex justify-center items-center">
                 <pre data-game-grid>loading...</pre>
             </div>
+            <div data-show-on-touch class="hidden">
+                <div class="flex flex-col items-center gap-4 pb-4">
+                    <div>
+                        <div data-touch-button="up"
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            w
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div data-touch-button="left"
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            a
+                        </div>
+                        <div data-touch-button="down"
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            s
+                        </div>
+                        <div data-touch-button="right"
+                            class="cursor-pointer px-8 py-6 text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm">
+                            d
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button data-toggle-touch-controls
+                class="cursor-pointer text-stone-50/25 hover:text-stone-50/50 border-1 rounded-sm px-2 w-fit self-center">
+                Show Touch Controls
+            </button>
         </section>
     </main>
 </body>

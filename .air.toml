@@ -12,7 +12,7 @@ tmp_dir = "tmp"
     "bunx tsc --noEmit",
     "bunx @tailwindcss/cli -i ./web/input.css -o ./public/styles.css",
     "bun build ./web/src/index.ts --outdir=./public",
-    "GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./web/wasm",
+    # "GOOS=js GOARCH=wasm tinygo build -o ./public/main.wasm ./web/wasm",
   ]
   cmd = "go build -o ./tmp/main ./cmd/server"
   post_cmd = []

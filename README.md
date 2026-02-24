@@ -10,6 +10,8 @@ curl -fsSL cURLy.gjt.io/install.sh | bash
 powershell -c "irm curly.gjt.io/install.ps1 | iex"
 ```
 
+also available on the web (desktop and mobile) at [curly.gjt.io](https://curly.gjt.io)
+
 ## pre-requisites
 
 - [Go](https://go.dev/doc/install)

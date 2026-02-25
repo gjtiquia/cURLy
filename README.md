@@ -26,7 +26,12 @@ curl -fsSL cURLy.gjt.io/install.sh | bash
 powershell -c "irm curly.gjt.io/install.ps1 | iex"
 ```
 
-also available on the web (desktop and mobile) at [curly.gjt.io](https://curly.gjt.io)
+also available on the web (desktop and mobile) at [cURLy.gjt.io](https://cURLy.gjt.io)
+
+```bash
+# can also be installed via go install
+go install github.com/gjtiquia/cURLy/cmd/cURLy@latest
+```
 
 ## pre-requisites
 
@@ -39,11 +44,11 @@ also available on the web (desktop and mobile) at [curly.gjt.io](https://curly.g
 ## tasks
 
 ```bash
-# run cURLy tui
-go run ./cmd/tui
+# run cURLy
+go run ./cmd/cURLy
 
-# build cURLy tui executables
-make build/tui
+# build cURLy executables
+make build/cURly
 ```
 
 ```bash

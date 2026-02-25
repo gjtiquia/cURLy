@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-const SOURCE_DIR = "./cmd/tui"
+const SOURCE_DIR = "./cmd/cURLy"
 const BUILD_DIR = "./bin"
 const BUILD_FILE = "cURLy"
 

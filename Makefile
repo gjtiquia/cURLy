@@ -1,4 +1,4 @@
-build/tui:
+build/cURLy:
 	go run ./cmd/build
 
 build/server:

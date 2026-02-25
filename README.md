@@ -31,6 +31,9 @@ also available on the web (desktop and mobile) at [cURLy.gjt.io](https://cURLy.g
 ```bash
 # can also be installed via go install
 go install github.com/gjtiquia/cURLy/cmd/cURLy@latest
+
+# then run the commmand
+cURLy
 ```
 
 ## pre-requisites
@@ -65,3 +68,12 @@ make build/server
 # run web server on specific port
 PORT=4321 ./bin/server
 ```
+
+## publish
+
+- build executables
+- create new release (and new tag) on GitHub releases
+- upload all executables
+- publish new release
+- install scripts will then download from the latest release
+- `go install` command will also download from the latest release tag
